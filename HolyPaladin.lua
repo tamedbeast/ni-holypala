@@ -5,17 +5,19 @@ local enables = {
 }
 
 local values = {
-    ["holyShockThreshold"] = 88, -- Set the default threshold for Holy Shock to 88
-    ["flashOfLightThreshold"] = 88, -- Set the default threshold for Flash of Light to 88
-    ["divineFavorThreshold"] = 25, -- Set the default threshold for Divine Favor to 25
-    ["auraMasteryThreshold"] = 65, -- Set the default threshold for Aura Mastery to 65
-    ["divineIlluminationThreshold"] = 65, -- Set the default threshold for Divine Illumination to 65
-    ["divineShieldThreshold"] = 35, -- Set the default threshold for Divine Shield to 35
-    ["handOfProtectionThreshold"] = 40, -- Set the default threshold for Hand of Protection to 40
-    ["layOnHandsThreshold"] = 25, -- Adjust the threshold as desired
+    -- Set the default values for thresholds
+    ["holyShockThreshold"] = 88,
+    ["flashOfLightThreshold"] = 88,
+    ["divineFavorThreshold"] = 25,
+    ["auraMasteryThreshold"] = 65,
+    ["divineIlluminationThreshold"] = 65,
+    ["divineShieldThreshold"] = 35,
+    ["handOfProtectionThreshold"] = 40,
+    ["layOnHandsThreshold"] = 25,
 }
 
 local spells = {
+    -- Define the spell IDs
     layOnHands = 48788,
     holyShock = 48825,
     flashOfLight = 48785,
@@ -29,6 +31,7 @@ local spells = {
 }
 
 local function GUICallback(key, item_type, value)
+    -- Update the corresponding enable/value based on the GUI input
     if item_type == "enabled" then
         enables[key] = value
     elseif item_type == "value" then
@@ -52,7 +55,7 @@ local items = {
     { type = "entry", text = "Flash of Light Threshold", tooltip = "The health percentage at which to use Flash of Light", value = 88, min = 0, max = 100, step = 1, key = "flashOfLightThreshold" },
     { type = "separator" },
     { type = "entry", text = "Enable Offense", tooltip = "Enable or disable automatic offensive actions", enabled = true, key = "offense" },
-	{ type = "separator" },
+    { type = "separator" },
     { type = "entry", text = "Enable Beacon of Light", tooltip = "Enable or disable casting Beacon of Light", enabled = true, key = "beaconOfLightBuff" },
     { type = "entry", text = "Enable Sacred Shield", tooltip = "Enable or disable casting Sacred Shield", enabled = true, key = "sacredShieldBuff" },
 }
@@ -155,7 +158,7 @@ local abilities = {
     end,
 
     ["beaconOfLight"] = function()
-        if enables["buffs"] and enables["beaconOfLightBuff"] and not ni.player.ismounted() and not UnitIsDeadOrGhost("player") then
+        if enables["buffs"] and enables["beaconOfLightBuff"] and not ni.player.ismounted() and not UnitIsDeadOrGhost("player") and ni.spell.available(spells.beaconOfLight) then
             if not ni.player.buff(spells.beaconOfLight) then
                 ni.spell.cast(spells.beaconOfLight, 'player')
             end
@@ -163,7 +166,7 @@ local abilities = {
     end,
 
     ["sacredShield"] = function()
-        if enables["buffs"] and enables["sacredShieldBuff"] and not ni.player.ismounted() and not UnitIsDeadOrGhost("player") then
+        if enables["buffs"] and enables["sacredShieldBuff"] and not ni.player.ismounted() and not UnitIsDeadOrGhost("player") and ni.spell.available(spells.sacredShield) then
             if not ni.player.buff(spells.sacredShield) then
                 ni.spell.cast(spells.sacredShield, 'player')
             end
