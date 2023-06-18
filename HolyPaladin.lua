@@ -5,19 +5,17 @@ local enables = {
 }
 
 local values = {
-    -- Set the default values for thresholds
-    ["holyShockThreshold"] = 88,
-    ["flashOfLightThreshold"] = 88,
-    ["divineFavorThreshold"] = 25,
-    ["auraMasteryThreshold"] = 65,
-    ["divineIlluminationThreshold"] = 65,
-    ["divineShieldThreshold"] = 35,
-    ["handOfProtectionThreshold"] = 40,
-    ["layOnHandsThreshold"] = 25,
+    ["holyShockThreshold"] = 88, -- Set the default threshold for Holy Shock to 88
+    ["flashOfLightThreshold"] = 88, -- Set the default threshold for Flash of Light to 88
+    ["divineFavorThreshold"] = 25, -- Set the default threshold for Divine Favor to 25
+    ["auraMasteryThreshold"] = 65, -- Set the default threshold for Aura Mastery to 65
+    ["divineIlluminationThreshold"] = 65, -- Set the default threshold for Divine Illumination to 65
+    ["divineShieldThreshold"] = 35, -- Set the default threshold for Divine Shield to 35
+    ["handOfProtectionThreshold"] = 40, -- Set the default threshold for Hand of Protection to 40
+    ["layOnHandsThreshold"] = 25, -- Adjust the threshold as desired
 }
 
 local spells = {
-    -- Define the spell IDs
     layOnHands = 48788,
     holyShock = 48825,
     flashOfLight = 48785,
@@ -28,10 +26,10 @@ local spells = {
     handOfProtection = 10278,
     beaconOfLight = 53563,
     sacredShield = 53601,
+    blessingOfKings = 20217,
 }
 
 local function GUICallback(key, item_type, value)
-    -- Update the corresponding enable/value based on the GUI input
     if item_type == "enabled" then
         enables[key] = value
     elseif item_type == "value" then
@@ -80,6 +78,7 @@ local queue = {
     "offense",
     "beaconOfLight",
     "sacredShield",
+    "blessingOfKings",
 }
 
 local abilities = {
@@ -169,6 +168,14 @@ local abilities = {
         if enables["buffs"] and enables["sacredShieldBuff"] and not ni.player.ismounted() and not UnitIsDeadOrGhost("player") and ni.spell.available(spells.sacredShield) then
             if not ni.player.buff(spells.sacredShield) then
                 ni.spell.cast(spells.sacredShield, 'player')
+            end
+        end
+    end,
+
+    ["blessingOfKings"] = function()
+        if enables["buffs"] and not ni.player.ismounted() and not UnitIsDeadOrGhost("player") and ni.spell.available(spells.blessingOfKings) then
+            if not ni.player.buff(spells.blessingOfKings) then
+                ni.spell.cast(spells.blessingOfKings, 'player')
             end
         end
     end,
