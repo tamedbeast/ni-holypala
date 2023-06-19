@@ -99,6 +99,12 @@ end
 
 local function castSpell(spell, target, threshold)
     if not ni.player.ismounted() and not UnitIsDeadOrGhost("player") and ni.spell.available(spell) and not ni.spell.gcd() then
+        local forbearance = 25771
+        if spell == spells.handOfProtection or spell == spells.divineShield or spell == spells.layOnHands then
+            if ni.player.debuff(forbearance) then
+                return
+            end
+        end
         if target == 'player' then
             if ni.player.hp() <= threshold then
                 ni.spell.stopcasting()
@@ -108,12 +114,17 @@ local function castSpell(spell, target, threshold)
             for i = 1, #ni.members do
                 local ally = ni.members[i]
                 if ally:hp() <= threshold and ally:valid(spell, false, true) and ally:los() then
+                    if spell == spells.flashOfLight and ni.player.ismoving() then
+                        return
+                    end
                     ni.spell.cast(spell, ally.guid)
                 end
             end
         end
     end
 end
+
+
 
 local function castSelfBuff(spell)
     if not ni.player.ismounted() and not UnitIsDeadOrGhost("player") and ni.spell.available(spell) and not ni.spell.gcd() and not ni.player.buff(spell) then
