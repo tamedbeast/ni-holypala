@@ -175,6 +175,9 @@ local function castSpellBuff(spell)
     end
 end
 
+local lastMoveTime = 0
+local infusionOfLightBuff = 54149 -- Replace with the actual spell ID for Infusion of Light buff
+
 local function castSpell(spell, target, threshold)
     if not UCheck(spell) then
         return
@@ -186,17 +189,41 @@ local function castSpell(spell, target, threshold)
         return
     end
 
-    for i = 1, #ni.members do
-        local ally = ni.members[i]
-        if ally:valid(spell, false, true) and ally:los() and ally:hp() <= threshold and (spell ~= spells.flashOfLight or not ni.player.ismoving()) then
-            if spell == spells.handOfFreedom and hasAnyDebuff(ally, debuffHoF) and ally.ismoving() then
-                ni.spell.cast(spell, ally.guid)
-            elseif spell ~= spells.handOfFreedom then
-                ni.spell.cast(spell, ally.guid)
+    if spell == spells.flashOfLight then
+        local hasInfusionOfLightBuff = ni.player.buff(infusionOfLightBuff)
+        if not ni.player.ismoving() or hasInfusionOfLightBuff then
+            local currentTime = GetTime()
+            if ni.player.ismoving() and hasInfusionOfLightBuff then
+                lastMoveTime = currentTime
+            elseif not ni.player.ismoving() and (currentTime - lastMoveTime >= 0.1) then
+                lastMoveTime = 0
+            end
+
+            for i = 1, #ni.members do
+                local ally = ni.members[i]
+                if ally:valid(spell, false, true) and ally:los() and ally:hp() <= threshold then
+                    if spell == spells.handOfFreedom and hasAnyDebuff(ally, debuffHoF) then
+                        ni.spell.cast(spell, ally.guid)
+                    elseif spell ~= spells.handOfFreedom then
+                        ni.spell.cast(spell, ally.guid)
+                    end
+                end
+            end
+        end
+    else
+        for i = 1, #ni.members do
+            local ally = ni.members[i]
+            if ally:valid(spell, false, true) and ally:los() and ally:hp() <= threshold then
+                if spell == spells.handOfFreedom and hasAnyDebuff(ally, debuffHoF) then
+                    ni.spell.cast(spell, ally.guid)
+                elseif spell ~= spells.handOfFreedom then
+                    ni.spell.cast(spell, ally.guid)
+                end
             end
         end
     end
 end
+
 
 local function castSpellWithDebuffCheck(spell, target, threshold)
     if not UCheck(spell) then
@@ -226,19 +253,22 @@ local function emergencyCast(spell, target, threshold)
         return
     end
 
-    if target == 'player' and ni.player.hp() <= threshold and ni.player.combat() then
-        ni.spell.stopcasting()
-        ni.spell.cast(spell, 'player')
-        return
-    end
+    ni.spell.stopcasting()
 
-    for i = 1, #ni.members do
-        local ally = ni.members[i]
-        if ally:valid(spell, false, true) and ally:los() and ally:hp() <= threshold and (spell ~= spells.flashOfLight or not ni.player.ismoving()) then
-            ni.spell.cast(spell, ally.guid)
+    if target == 'player' then
+        if ni.player.hp() <= threshold then
+            ni.spell.cast(spell, 'player')
+        end
+    else
+        for i = 1, #ni.members do
+            local ally = ni.members[i]
+            if ally:valid(spell, false, true) and ally:los() and ally:hp() <= threshold then
+                ni.spell.cast(spell, ally.guid)
+            end
         end
     end
 end
+
 
 local function findLowestEnemyPlayerInRange()
     local lowestHealth = 101
