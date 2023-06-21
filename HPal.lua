@@ -12,7 +12,7 @@ local queue = {
     "Hammer of Wrath",
     "Hammer of Justice",
     "Hand of Freedom",
-    --"Cleanse",
+    "Cleanse",
     "Holy Shock",
     "Flash of Light",
     "Sacred Shield",
