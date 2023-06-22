@@ -118,7 +118,11 @@ end
 local function ucheck()
     return not IsMounted() and not UnitInVehicle("player") and not UnitIsDeadOrGhost("player")
         and not UnitChannelInfo("player") and not UnitCastingInfo("player")
+        and not ni.unit.isstunned("player") and not ni.unit.issilenced("player")
+        and not ni.unit.ispacified("player") and not ni.unit.isdisarmed("player")
+        and not ni.unit.isfleeing("player") and not ni.unit.ispossessed("player")
 end
+
 
 -- Function Dispellable Debuffs
 local function canDispel(unit)
@@ -192,7 +196,7 @@ local abilities = {
 	-- Casts Hand of Protection on any group member if their health is below the threshold and the player has line of sight to them.
 	["Hand of Protection"] = function()
 		for i = 1, #ni.members do
-			if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Hand of Protection"]) and ni.members[i]:valid(spellIDs["Hand of Protection"], false, true) then
+			if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff(ni.members[i].guid, spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Hand of Protection"]) and ni.members[i]:valid(spellIDs["Hand of Protection"], false, true) then
 				if UnitCastingInfo("player") or UnitChannelInfo("player") then
 					ni.spell.stopcasting()
 				end
@@ -203,7 +207,6 @@ local abilities = {
 		end
 		return false
 	end,
-
 
     -- Lay on Hands
     -- Casts Lay on Hands on any group member if their health is below the threshold and the player has line of sight to them.
@@ -324,18 +327,19 @@ local abilities = {
         return false
     end,
 
-    -- Cleanse
-    -- Casts Cleanse on any group member if they have a dispellable debuff and the player has line of sight to them.
-    ["Cleanse"] = function()
-        for i = 1, #ni.members do
-            if ni.healing.candispel(ni.members[i].guid) and ucheck() and ni.spell.available(spellIDs["Cleanse"]) and ni.members[i]:valid(spellIDs["Cleanse"], false, true) then
-                ni.spell.cast(spellIDs["Cleanse"], ni.members[i].guid)
+	-- Cleanse
+	-- Casts Cleanse on any group member if they have a dispellable debuff and the player has line of sight to them.
+	["Cleanse"] = function()
+		for i = 1, #ni.members do
+			if ni.healing.candispel(ni.members[i].guid) and not ni.healing.dontdispel(ni.members[i].guid) and ucheck() and ni.spell.available(spellIDs["Cleanse"]) and ni.members[i]:valid(spellIDs["Cleanse"], false, true) then
+				ni.spell.cast(spellIDs["Cleanse"], ni.members[i].guid)
 				print("Cleanse")
-                return true
-            end
-        end
-        return false
-    end,
+				return true
+			end
+		end
+		return false
+	end,
+
 
     -- Holy Shock
     -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
