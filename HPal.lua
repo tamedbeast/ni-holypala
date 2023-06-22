@@ -31,6 +31,7 @@ local values = {
     ["Divine SacrificeThreshold"] = 75,
     ["Divine FavorThreshold"] = 25,
     ["Hand of FreedomThreshold"] = 65,
+	["Hand of SacrificeThreshold"] = 40,
     ["Holy ShockThreshold"] = 88,
     ["Flash of LightThreshold"] = 88,
     ["Seal of WisdomThreshold"] = 35,
@@ -169,7 +170,7 @@ local abilities = {
 	-- Divine Shield
 	-- Casts Divine Shield on the player if their health is below the threshold, they do not have the Forbearance debuff, and meet certain conditions.
 	["Divine Shield"] = function()
-		if ni.unit.hp("player") <= values["Divine ShieldThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ni.spell.available(spellIDs["Divine Shield"]) and not IsMounted() and not UnitInVehicle("player") and not UnitIsDeadOrGhost("player") then
+		if ni.unit.hp("player") <= values["Divine ShieldThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ni.spell.available(spellIDs["Divine Shield"]) and not IsMounted() and not UnitInVehicle("player") and not UnitIsDeadOrGhost("player") and UnitAffectingCombat("player") then
 			if UnitCastingInfo("player") or UnitChannelInfo("player") then
 				ni.spell.stopcasting()
 			end
@@ -183,7 +184,7 @@ local abilities = {
 	-- Divine Protection
 	-- Casts Divine Protection on the player if their health is below the threshold and Divine Shield is not available.
 	["Divine Protection"] = function()
-		if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Divine Protection"]) then
+		if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Divine Protection"]) and UnitAffectingCombat("player") then
 			if UnitCastingInfo("player") or UnitChannelInfo("player") then
 				ni.spell.stopcasting()
 			end
@@ -198,7 +199,7 @@ local abilities = {
 	-- Casts Hand of Protection on any group member if their health is below the threshold and the player has line of sight to them, and they do not have the Forbearance debuff.
 	["Hand of Protection"] = function()
 		for i = 1, #ni.members do
-			if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff(ni.members[i].guid, spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Hand of Protection"]) and ni.members[i]:valid(spellIDs["Hand of Protection"], false, true) and ni.members[i]:combat() then
+			if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Hand of Protection"]) and ni.members[i]:valid(spellIDs["Hand of Protection"], false, true) and ni.members[i]:combat() then
 				if UnitCastingInfo("player") or UnitChannelInfo("player") then
 					ni.spell.stopcasting()
 				end
@@ -226,20 +227,20 @@ local abilities = {
 		end
 		return false
 	end,
-----------------------------------------------------------	
-	-- --Hand of Sacrifice
-	-- --explain this spell here
-	-- ["Hand of Sacrifice"] = function()
-		-- for i = 1, #ni.members do
-			-- if ni.members[i]:hp() <= values["Hand of SacrificeThreshold"] and ucheck() and ni.spell.available(spellIDs["Hand of Sacrifice"]) and ni.members[i]:valid(spellIDs["Hand of Sacrifice"]) and ni.members[i]:combat() then
-				-- ni.spell.cast(spellIDs["Hand of Sacrifice"], ni.members[i].guid)
-				-- print("Hand of Sacrifice")
-				-- return true
-			-- end
-		-- end
-		-- return false
-	-- end,
-----------------------------------------------------------
+
+	-- Hand of Sacrifice
+	-- Casts Hand of Sacrifice on any group member if their health is below the threshold, the player is in combat, and they pass the ucheck conditions.
+	["Hand of Sacrifice"] = function()
+		for i = 1, #ni.members do
+			if ni.members[i]:hp() <= values["Hand of SacrificeThreshold"] and ucheck() and ni.spell.available(spellIDs["Hand of Sacrifice"]) and ni.members[i]:valid(spellIDs["Hand of Sacrifice"]) and ni.members[i]:combat() then
+				ni.spell.cast(spellIDs["Hand of Sacrifice"], ni.members[i].guid)
+				print("Hand of Sacrifice")
+				return true
+			end
+		end
+		return false
+	end,
+
     -- Aura Mastery
     -- Casts Aura Mastery if the player's health is below the threshold.
     ["Aura Mastery"] = function()
@@ -291,7 +292,7 @@ local abilities = {
     -- Use Healthstone
 	-- Uses a Healthstone if the player's health is below 20% and passes the ucheck conditions.
 	["Use Healthstone"] = function()
-		if ni.unit.hp("player") <= 20 and ni.player.hasitem("Fel Healthstone") and ucheck() then
+		if ni.unit.hp("player") <= 20 and ni.player.hasitem("Fel Healthstone") and ucheck() and UnitAffectingCombat("player") then
 			ni.player.useitem(GetItemIdByName("Fel Healthstone"))
 			print("Healthstone")
 			return true
