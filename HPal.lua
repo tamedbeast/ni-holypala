@@ -190,7 +190,7 @@ local abilities = {
 	-- Casts Hand of Protection on any group member if their health is below the threshold and the player has line of sight to them.
 	["Hand of Protection"] = function()
 		for i = 1, #ni.members do
-			if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff(ni.members[i].guid, spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Hand of Protection"]) and ni.members[i]:valid(spellIDs["Hand of Protection"], false, true) then
+			if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Hand of Protection"]) and ni.members[i]:valid(spellIDs["Hand of Protection"], false, true) then
 				if UnitCastingInfo("player") or UnitChannelInfo("player") then
 					ni.spell.stopcasting()
 				end
@@ -206,7 +206,7 @@ local abilities = {
     -- Casts Lay on Hands on any group member if their health is below the threshold and the player has line of sight to them.
     ["Lay on Hands"] = function()
         for i = 1, #ni.members do
-            if ni.members[i]:hp() <= values["Lay on HandsThreshold"] and not ni.unit.debuff(ni.members[i].guid, spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Lay on Hands"]) and ni.members[i]:valid(spellIDs["Lay on Hands"]) then
+            if ni.members[i]:hp() <= values["Lay on HandsThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Lay on Hands"]) and ni.members[i]:valid(spellIDs["Lay on Hands"]) then
                 if UnitCastingInfo("player") or UnitChannelInfo("player") then
 					ni.spell.stopcasting()
 				end
