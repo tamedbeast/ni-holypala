@@ -164,19 +164,19 @@ end
 
 -- Ability functions
 local abilities = {
-    -- Divine Shield
-    -- Casts Divine Shield on the player if their health is below the threshold and they do not have the Forbearance debuff.
-    ["Divine Shield"] = function()
-        if ni.unit.hp("player") <= values["Divine ShieldThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Divine Shield"]) then
-            if UnitCastingInfo("player") or UnitChannelInfo("player") then
-                ni.spell.stopcasting()
-            end
-            ni.spell.cast(spellIDs["Divine Shield"], "player")
+	-- Divine Shield
+	-- Casts Divine Shield on the player if their health is below the threshold, they do not have the Forbearance debuff, and meet certain conditions.
+	["Divine Shield"] = function()
+		if ni.unit.hp("player") <= values["Divine ShieldThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ni.spell.available(spellIDs["Divine Shield"]) and not IsMounted() and not UnitInVehicle("player") and not UnitIsDeadOrGhost("player") then
+			if UnitCastingInfo("player") or UnitChannelInfo("player") then
+				ni.spell.stopcasting()
+			end
+			ni.spell.cast(spellIDs["Divine Shield"], "player")
 			print("Divine Shield")
-            return true
-        end
-        return false
-    end,
+			return true
+		end
+		return false
+	end,
 
 	-- Divine Protection
 	-- Casts Divine Protection on the player if their health is below the threshold and Divine Shield is not available.
@@ -193,20 +193,21 @@ local abilities = {
 	end,
 
 	-- Hand of Protection
-	-- Casts Hand of Protection on any group member if their health is below the threshold and the player has line of sight to them.
+	-- Casts Hand of Protection on any group member if their health is below the threshold and the player has line of sight to them, and they do not have the Forbearance debuff.
 	["Hand of Protection"] = function()
 		for i = 1, #ni.members do
-			if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff(ni.members[i].guid, spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Hand of Protection"]) and ni.members[i]:valid(spellIDs["Hand of Protection"], false, true) then
+			local member = ni.members[i]
+			if member:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff(member.guid, spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Hand of Protection"]) and member:valid(spellIDs["Hand of Protection"], false, true) then
 				if UnitCastingInfo("player") or UnitChannelInfo("player") then
 					ni.spell.stopcasting()
 				end
-				ni.spell.cast(spellIDs["Hand of Protection"], ni.members[i].guid)
+				ni.spell.cast(spellIDs["Hand of Protection"], member.guid)
 				print("Hand of Protection")
 				return true
 			end
 		end
 		return false
-	end,
+	end
 
     -- Lay on Hands
     -- Casts Lay on Hands on any group member if their health is below the threshold and the player has line of sight to them.
@@ -285,7 +286,7 @@ local abilities = {
     end,
 
 	-- Hammer of Wrath
-	-- Casts Hammer of Wrath on an enemy within 30 yards if their health is below the threshold.
+	-- Casts on an enemy target within 30 yards if their health is below the threshold and the spell is available.
 	["Hammer of Wrath"] = function()
 		local target = tarEnemy(30)
 		if target and ni.unit.hp(target) <= values["Hammer of WrathThreshold"] and ucheck() and ni.spell.available(spellIDs["Hammer of Wrath"]) then
@@ -302,18 +303,18 @@ local abilities = {
 		return false
 	end,
 
-    -- Hammer of Justice
-    -- Casts Hammer of Justice on an enemy within 10 yards if they are casting a spell.
-    ["Hammer of Justice"] = function()
-        local target = tarEnemy(10) 
-        if target and ni.unit.iscasting(target) and ucheck() and ni.spell.available(spellIDs["Hammer of Justice"]) and ni.unit.valid(target, spellIDs["Hammer of Justice"]) then
-            ni.spell.cast(spellIDs["Hammer of Justice"], target)
+	-- Hammer of Justice
+	--Casts on an enemy target within 10 yards if they are casting or channeling, and the spell is available.
+	["Hammer of Justice"] = function()
+		local target = tarEnemy(10)
+		if target and (ni.unit.iscasting(target) or ni.unit.ischanneling(target)) and ucheck() and ni.spell.available(spellIDs["Hammer of Justice"]) and ni.unit.valid(target, spellIDs["Hammer of Justice"]) then
+			ni.spell.cast(spellIDs["Hammer of Justice"], target)
 			print("Hammer of Justice")
-            return true
-        end
-        return false
-    end,
-
+			return true
+		end
+		return false
+	end,
+	
 	-- Hand of Freedom
     -- Casts Hand of Freedom on any group member if they have a Snare debuff and the player has line of sight to them.
     ["Hand of Freedom"] = function()
