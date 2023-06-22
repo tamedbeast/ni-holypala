@@ -101,10 +101,22 @@ end
 
 -- Ability functions
 local abilities = {
-	-- Divine Protection
-	-- Casts Divine Protection on the player if their health is below the threshold and Divine Shield is not available.
+	-- Divine Shield
+	-- Casts Divine Shield on the player if their health is below the threshold.
+	["Divine Shield"] = function()
+		if ni.unit.hp("player") <= values["Divine ShieldThreshold"] and not ni.unit.debuff("player", "Forbearance") and ucheck() and ni.spell.available("Divine Shield") and UnitAffectingCombat("player") then
+			if UnitCastingInfo("player") or UnitChannelInfo("player") then
+				ni.spell.stopcasting()
+			end
+			ni.spell.cast("Divine Shield", "player")
+			print("Divine Shield")
+			return true
+		end
+		return false
+	end,	
+	
 	["Divine Protection"] = function()
-		if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.unit.debuff("player", "Forbearance") and ucheck() and ni.spell.available("Divine Protection") and UnitAffectingCombat("player") then
+		if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.unit.debuff("player", "Forbearance") and ucheck() and not ni.spell.available("Divine Shield") and ni.spell.available("Divine Protection") and UnitAffectingCombat("player") then
 			if UnitCastingInfo("player") or UnitChannelInfo("player") then
 				ni.spell.stopcasting()
 			end
