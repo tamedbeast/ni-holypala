@@ -1,8 +1,8 @@
 local queue = {
 	"Divine Shield",
 	"Hand of Protection",
-    "Divine Protection",
     "Lay on Hands",
+	"Divine Protection",
 	"Use Healthstone",
     "Divine Sacrifice",
     "Hand of Sacrifice",
