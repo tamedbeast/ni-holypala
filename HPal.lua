@@ -168,6 +168,7 @@ local abilities = {
                 ni.spell.stopcasting()
             end
             ni.spell.cast(spellIDs["Divine Shield"], "player")
+			print("Divine Shield")
             return true
         end
         return false
@@ -181,6 +182,7 @@ local abilities = {
 				ni.spell.stopcasting()
 			end
 			ni.spell.cast(spellIDs["Divine Protection"], "player")
+			print("Divine Protection")
 			return true
 		end
 		return false
@@ -195,6 +197,7 @@ local abilities = {
 					ni.spell.stopcasting()
 				end
 				ni.spell.cast(spellIDs["Hand of Protection"], ni.members[i].guid)
+				print("Hand of Protection")
 				return true
 			end
 		end
@@ -211,6 +214,7 @@ local abilities = {
 					ni.spell.stopcasting()
 				end
                 ni.spell.cast(spellIDs["Lay on Hands"], ni.members[i].guid)
+				print("Lay on Hands")
                 return true
             end
         end
@@ -222,6 +226,7 @@ local abilities = {
     ["Aura Mastery"] = function()
         if ni.unit.hp("player") <= values["Aura MasteryThreshold"] and ucheck() and ni.spell.available(spellIDs["Aura Mastery"]) then
             ni.spell.cast(spellIDs["Aura Mastery"], "player")
+			print("Aura Mastery")
             return true
         end
         return false
@@ -232,6 +237,7 @@ local abilities = {
    ["Divine Illumination"] = function()
         if ni.unit.power("player") <= values["Divine IlluminationThreshold"] and ucheck() and ni.spell.available(spellIDs["Divine Illumination"]) then
             ni.spell.cast(spellIDs["Divine Illumination"], "player")
+			print("Divine Illumination")
             return true
         end
         return false
@@ -243,6 +249,7 @@ local abilities = {
         for i = 1, #ni.members do
             if ni.members[i]:hp() <= values["Divine SacrificeThreshold"] and ucheck() and ni.spell.available(spellIDs["Divine Sacrifice"]) and ni.members[i]:valid(spellIDs["Divine Sacrifice"]) then 
                 ni.spell.cast(spellIDs["Divine Sacrifice"], ni.members[i].guid)
+				print("Divine Sacrifice")
                 return true
             end
         end
@@ -255,6 +262,7 @@ local abilities = {
         for i = 1, #ni.members do
             if ni.members[i]:hp() <= values["Divine FavorThreshold"] and ucheck() and ni.spell.available(spellIDs["Divine Favor"]) then
                 ni.spell.cast(spellIDs["Divine Favor"], ni.members[i].guid)
+				print("Divine Favor")
                 return true
             end
         end
@@ -267,6 +275,7 @@ local abilities = {
         local itemId = 36892 -- This is the item ID of the Healthstone
         if ni.unit.hp("player") <= 20 and ni.player.hasitem(itemId) and ucheck("player", itemId) then
             ni.player.useitem(itemId) -- Uses Healthstone
+			print("Healthston")
             return true
         end
         return false
@@ -279,9 +288,11 @@ local abilities = {
 		if target and ni.unit.hp(target) <= values["Hammer of WrathThreshold"] and ucheck() and ni.spell.available(spellIDs["Hammer of Wrath"]) then
 			if ni.unit.valid(target, spellIDs["Hammer of Wrath"], true, true) then
 				ni.spell.cast(spellIDs["Hammer of Wrath"], target)
+				print("Hammer of Wrath")
 			elseif ni.unit.valid(target, spellIDs["Hammer of Wrath"], false, true) then
 				ni.player.lookat(target)
 				ni.spell.cast(spellIDs["Hammer of Wrath"], target)
+				print("Hammer of Wrath")
 			end
 			return true
 		end
@@ -294,6 +305,7 @@ local abilities = {
         local target = tarEnemy(10) 
         if target and ni.unit.iscasting(target) and ucheck() and ni.spell.available(spellIDs["Hammer of Justice"]) and ni.unit.valid(target, spellIDs["Hammer of Justice"]) then
             ni.spell.cast(spellIDs["Hammer of Justice"], target)
+			print("Hammer of Justice")
             return true
         end
         return false
@@ -305,6 +317,7 @@ local abilities = {
         for i = 1, #ni.members do
             if ni.members[i]:debufftype("Snare") and ucheck() and ni.spell.available(spellIDs["Hand of Freedom"]) and ni.members[i]:valid(spellIDs["Hand of Freedom"], false, true) then
                 ni.spell.cast(spellIDs["Hand of Freedom"], ni.members[i].guid)
+				print("Hand of Freedom")
                 return true
             end
         end
@@ -317,6 +330,7 @@ local abilities = {
         for i = 1, #ni.members do
             if ni.healing.candispel(ni.members[i].guid) and ucheck() and ni.spell.available(spellIDs["Cleanse"]) and ni.members[i]:valid(spellIDs["Cleanse"], false, true) then
                 ni.spell.cast(spellIDs["Cleanse"], ni.members[i].guid)
+				print("Cleanse")
                 return true
             end
         end
@@ -329,6 +343,7 @@ local abilities = {
         for i = 1, #ni.members do
             if ni.members[i]:hp() <= values["Holy ShockThreshold"] and ucheck() and ni.spell.available(spellIDs["Holy Shock"]) and ni.members[i]:valid(spellIDs["Holy Shock"], false, true) then
                 ni.spell.cast(spellIDs["Holy Shock"], ni.members[i].guid)
+				print("Holy Shock")
                 return true
             end
         end
@@ -343,6 +358,7 @@ local abilities = {
 		for i = 1, #ni.members do
 			if (not isMoving or hasInfusionOfLight) and ni.members[i]:hp() <= values["Flash of LightThreshold"] and ucheck() and ni.spell.available(spellIDs["Flash of Light"]) and ni.members[i]:valid(spellIDs["Flash of Light"], false, true) then
 				ni.spell.cast(spellIDs["Flash of Light"], ni.members[i].guid)
+				print("Flash of Light")
 				return true
 			end
 		end
@@ -352,9 +368,10 @@ local abilities = {
     -- Sacred Shield
     -- Casts Sacred Shield on the player if they do not already have the Sacred Shield buff.
     ["Sacred Shield"] = function()
-        if not ni.unit.buff("player", spellIDs["Sacred Shield"], "exact") and ucheck("player", spellIDs["Sacred Shield"]) and ni.spell.available(spellIDs["Sacred Shield"]) then
+		if not ni.unit.buff("player", spellIDs["Sacred Shield"], "exact") and ucheck("player", spellIDs["Sacred Shield"]) and ni.spell.available(spellIDs["Sacred Shield"]) then
             ni.spell.cast(spellIDs["Sacred Shield"], "player")
-            return true
+            print("Sacred Shield")
+			return true
         end
         return false
     end,
@@ -364,6 +381,7 @@ local abilities = {
     ["Beacon of Light"] = function()
         if not ni.unit.buff("player", spellIDs["Beacon of Light"], "exact") and ucheck("player", spellIDs["Beacon of Light"]) and ni.spell.available(spellIDs["Beacon of Light"]) then
             ni.spell.cast(spellIDs["Beacon of Light"], "player")
+			print("Beacon of Light")
             return true
         end
         return false
@@ -377,6 +395,7 @@ local abilities = {
         local hasBlessing = ni.unit.buff("player", spellIDs["Blessing of Kings"])
         if not hasBlessing and not hasGreaterBlessing and ucheck("player", spellIDs["Blessing of Kings"]) and ni.spell.available(spellIDs["Blessing of Kings"]) then
             ni.spell.cast(spellIDs["Blessing of Kings"], "player")
+			print("Blessing of Kings")
             return true
         end
         return false
