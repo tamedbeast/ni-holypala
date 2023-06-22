@@ -120,71 +120,15 @@ end
 -- Function to check if the player is eligible to cast a spell
 local function ucheck()
     return not IsMounted() and not UnitInVehicle("player") and not UnitIsDeadOrGhost("player")
-        and not UnitChannelInfo("player") and not UnitCastingInfo("player")
-        and not ni.unit.isstunned("player") and not ni.unit.issilenced("player")
-        and not ni.unit.ispacified("player") and not ni.unit.isdisarmed("player")
-        and not ni.unit.isfleeing("player") and not ni.unit.ispossessed("player")
-end
-
-
--- Function Dispellable Debuffs
-local function canDispel(unit)
-    for i = 1, #dispellableDebuffs do
-        if ni.unit.debuff(unit, dispellableDebuffs[i]) then
-            return true
-        end
-    end
-    return false
-end
-
--- Function Line of Sight Checker
-local function losCheck()
-    for i = 1, #ni.members do
-        if ni.members[i]:los() then
-            return true
-        end
-    end
-    return false
-end
-
--- Function to target an enemy within range
-local function tarEnemy(range)
-    local enemies = ni.unit.enemiesinrange("player", range)
-    local target = nil
-
-    for i = 1, #enemies do
-        if target == nil or enemies[i].distance < target.distance then
-            target = enemies[i]
-        end
-    end
-
-    if target then
-        return target.guid
-    end
-
-    return nil
+        and not UnitChannelInfo("player") and not UnitCastingInfo("player") and not ni.unit.isstunned("player") and not ni.unit.issilenced("player") and not ni.unit.ispacified("player") and not ni.unit.isdisarmed("player") and not ni.unit.isfleeing("player") and not ni.unit.ispossessed("player") and not ni.unit.isimmune("player")
 end
 
 -- Ability functions
 local abilities = {
-	-- Divine Shield
-	-- Casts Divine Shield on the player if their health is below the threshold, they do not have the Forbearance debuff, and meet certain conditions.
-	["Divine Shield"] = function()
-		if ni.unit.hp("player") <= values["Divine ShieldThreshold"] and not ni.members[i]:debuff(spellIDs["Forbearance"], "exact") and ni.spell.available(spellIDs["Divine Shield"]) and not IsMounted() and not UnitInVehicle("player") and not UnitIsDeadOrGhost("player") and UnitAffectingCombat("player") then
-			if UnitCastingInfo("player") or UnitChannelInfo("player") then
-				ni.spell.stopcasting()
-			end
-			ni.spell.cast(spellIDs["Divine Shield"], "player")
-			print("Divine Shield")
-			return true
-		end
-		return false
-	end,
-
 	-- Divine Protection
 	-- Casts Divine Protection on the player if their health is below the threshold and Divine Shield is not available.
 	["Divine Protection"] = function()
-		if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.members[i]:debuff(spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Divine Protection"]) and UnitAffectingCombat("player") then
+		if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Divine Protection"]) and UnitAffectingCombat("player") then
 			if UnitCastingInfo("player") or UnitChannelInfo("player") then
 				ni.spell.stopcasting()
 			end
@@ -194,6 +138,21 @@ local abilities = {
 		end
 		return false
 	end,
+
+	-- Divine Protection
+	-- Casts Divine Protection on the player if their health is below the threshold and Divine Shield is not available.
+	["Divine Protection"] = function()
+		if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck() and ni.spell.available(spellIDs["Divine Protection"]) and UnitAffectingCombat("player") then
+			if UnitCastingInfo("player") or UnitChannelInfo("player") then
+				ni.spell.stopcasting()
+			end
+			ni.spell.cast(spellIDs["Divine Protection"], "player")
+			print("Divine Protection")
+			return true
+		end
+		return false
+	end,
+
 
 	-- Hand of Protection
 	-- Casts Hand of Protection on any group member if their health is below the threshold and the player has line of sight to them, and they do not have the Forbearance debuff.
@@ -278,12 +237,16 @@ local abilities = {
 
     -- Divine Favor
     -- Casts Divine Favor if their health is below the threshold and the player has line of sight to them.
-    ["Divine Favor"] = function()
+	["Divine Favor"] = function()
 		for i = 1, #ni.members do
-			if ni.members[i]:hp() <= values["Divine FavorThreshold"] and ucheck() and ni.spell.available(spellIDs["Divine Favor"]) and ni.members[i]:combat() then
-				ni.spell.cast(spellIDs["Divine Favor"], ni.members[i].guid)
-				print("Divine Favor")
-				return true
+			-- Check if the conditions for Holy Shock are met
+			if ni.members[i]:hp() <= values["Holy ShockThreshold"] and ucheck() and ni.spell.available(spellIDs["Holy Shock"]) and ni.members[i]:valid(spellIDs["Holy Shock"], false, true) and ni.members[i]:combat() then
+				-- If the conditions for Holy Shock are met, check if Divine Favor can be cast
+				if ni.members[i]:hp() <= values["Divine FavorThreshold"] and ucheck() and ni.spell.available(spellIDs["Divine Favor"]) then
+					ni.spell.cast(spellIDs["Divine Favor"], ni.members[i].guid)
+					print("Divine Favor")
+					return true
+				end
 			end
 		end
 		return false
@@ -303,41 +266,49 @@ local abilities = {
 	-- Hammer of Wrath
 	-- Casts on an enemy target within 30 yards if their health is below the threshold and the spell is available.
 	["Hammer of Wrath"] = function()
-		local target = tarEnemy(30)
-		if target and ni.unit.hp(target) <= values["Hammer of WrathThreshold"] and ucheck() and ni.spell.available(spellIDs["Hammer of Wrath"]) and ni.spell.valid(target, spellIDs["Hammer of Wrath"], false, true) then
+		local enemies = ni.unit.enemiesinrange("player", 30)
+		for i = 1, #enemies do
+			local target = enemies[i].guid
+			if ni.unit.hp(target) <= values["Hammer of WrathThreshold"] and ucheck() and ni.spell.available(spellIDs["Hammer of Wrath"]) and ni.spell.valid(target, spellIDs["Hammer of Wrath"], false, true) then
 				ni.player.lookat(target)
 				ni.spell.cast(spellIDs["Hammer of Wrath"], target)
 				print("Hammer of Wrath")
-			
-			return true
+				return true
+			end
 		end
+
 		return false
-	end,
+	end
 
 	-- Hammer of Justice
-	--Casts on an enemy target within 10 yards if they are casting or channeling, and the spell is available.
+	-- Casts on an enemy target within 10 yards if they are casting or channeling, and the spell is available.
 	["Hammer of Justice"] = function()
-		local target = tarEnemy(10)
-		if target and (ni.unit.iscasting(target) or ni.unit.ischanneling(target)) and ucheck() and ni.spell.available(spellIDs["Hammer of Justice"]) and ni.spell.valid(target, spellIDs["Hammer of Justice"]) then
-			ni.spell.cast(spellIDs["Hammer of Justice"], target)
-			print("Hammer of Justice")
-			return true
+		local enemies = ni.unit.enemiesinrange("player", 10)
+		for i = 1, #enemies do
+			local target = enemies[i].guid
+			if (ni.unit.iscasting(target) or ni.unit.ischanneling(target)) and ucheck() and ni.spell.available(spellIDs["Hammer of Justice"]) and ni.spell.valid(target, spellIDs["Hammer of Justice"]) then
+				ni.spell.cast(spellIDs["Hammer of Justice"], target)
+				print("Hammer of Justice")
+				return true
+			end
+		end
+
+		return false
+	end
+
+	
+	-- Hand of Freedom
+	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
+	["Hand of Freedom"] = function()
+		for i = 1, #ni.members do
+			if ni.members[i]:combat() and (ni.members[i]:debufftype("Snare") or ni.members[i]:debufftype("Root") or ni.members[i]:debufftype("Stun")) and ucheck() and ni.spell.available(spellIDs["Hand of Freedom"]) and ni.members[i]:valid(spellIDs["Hand of Freedom"], false, true) then
+				ni.spell.cast(spellIDs["Hand of Freedom"], ni.members[i].guid)
+				print("Hand of Freedom")
+				return true
+			end
 		end
 		return false
 	end,
-	
-	-- Hand of Freedom
-    -- Casts Hand of Freedom on any group member if they have a Snare debuff and the player has line of sight to them.
-    ["Hand of Freedom"] = function()
-        for i = 1, #ni.members do
-            if ni.members[i]:debufftype("Snare") and ucheck() and ni.spell.available(spellIDs["Hand of Freedom"]) and ni.members[i]:valid(spellIDs["Hand of Freedom"], false, true) then
-                ni.spell.cast(spellIDs["Hand of Freedom"], ni.members[i].guid)
-				print("Hand of Freedom")
-                return true
-            end
-        end
-        return false
-    end,
 
 	-- Cleanse
 	-- Casts Cleanse on any group member if they have a dispellable debuff and the player has line of sight to them.
