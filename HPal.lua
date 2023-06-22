@@ -1,34 +1,33 @@
 local queue = {
-    "Aura Mastery",
-    "Divine Illumination",
-    "Divine Shield",
-    "Hand of Protection",
+	"Divine Shield",
+	"Hand of Protection",
     "Divine Protection",
     "Lay on Hands",
+	"Use Healthstone",
     "Divine Sacrifice",
     "Hand of Sacrifice",
-    "Divine Favor",
-    "Use Healthstone",
     "Hammer of Wrath",
     "Hammer of Justice",
+	"Aura Mastery",
+	"Divine Favor",
+    "Divine Illumination",
     "Hand of Freedom",
-    "Cleanse",
     "Holy Shock",
     "Flash of Light",
+    "Cleanse",
     "Sacred Shield",
     "Beacon of Light",
+    "Greater Blessing of Kings",
     "Blessing of Kings",
-    "Seal of Wisdom",
-    "Seal of Light",
 }
 
 local values = {
-    ["Aura MasteryThreshold"] = 65,
-    ["Divine IlluminationThreshold"] = 65,
-    ["Divine ShieldThreshold"] = 35,
-    ["Hand of ProtectionThreshold"] = 40,
+	["Divine ShieldThreshold"] = 35,
+	["Hand of ProtectionThreshold"] = 40,
     ["Divine ProtectionThreshold"] = 40,
     ["Lay on HandsThreshold"] = 25,
+    ["Aura MasteryThreshold"] = 65,
+    ["Divine IlluminationThreshold"] = 65,
     ["Divine SacrificeThreshold"] = 75,
     ["Divine FavorThreshold"] = 25,
     ["Hand of FreedomThreshold"] = 65,
@@ -36,24 +35,27 @@ local values = {
     ["Flash of LightThreshold"] = 88,
     ["Seal of WisdomThreshold"] = 35,
     ["Seal of LightThreshold"] = 70,
+	["Hammer of WrathThreshold"] = 20,
 }
 local dispellableDebuffs = {
-    "Concussive Shot", -- Hunter ability
-    "Wing Clip", -- Hunter ability
-    "Hamstring", -- Warrior ability
-    "Improved Hamstring", -- Warrior ability
-    "Frost Shock", -- Shaman ability
-    "Crippling Poison", -- Rogue ability
-    "Frostbolt", -- Mage ability
-    "Frost Nova", -- Mage ability
-    "Chilled", -- Effect from various Frost spells, primarily Mage abilities
-    "Slow", -- Mage ability
-    "Deadly Throw", -- Rogue ability
-    "Frostbrand Attack" -- Shaman ability
+    "Concussive Shot",
+    "Wing Clip",
+    "Hamstring",
+    "Improved Hamstring",
+    "Frost Shock",
+    "Crippling Poison",
+    "Frostbolt",
+    "Frost Nova",
+    "Chilled",
+    "Slow",
+    "Deadly Throw",
+    "Frostbrand Attack"
 }
 
+-- Local Containers
 local enables = {}
 local spellIDs = {}
+local itemIDs = {}
 
 local function GUICallback(key, item_type, value)
     if item_type == "enabled" and enables[key] ~= nil then
@@ -94,7 +96,22 @@ end
 
 -- Assign spell IDs to spell names
 for _, spellName in ipairs(queue) do
-    spellIDs[spellName] = GetSpellIdByName(spellName)
+    local spellId = GetSpellIdByName(spellName)
+    if spellId then
+        spellIDs[spellName] = spellId
+    else
+        print("Could not find spell ID for " .. spellName)
+    end
+end
+
+-- Function to get item ID by name
+local function GetItemIdByName(itemName)
+    if not itemName then return end
+    local _, itemLink = GetItemInfo(itemName)
+    if itemLink then
+        return tonumber(itemLink:match("item:(%d+)"))
+    end
+    return nil
 end
 
 -- Function to check if the player is eligible to cast a spell
@@ -103,13 +120,7 @@ local function ucheck(target, spell)
         and not UnitChannelInfo("player") and not UnitCastingInfo("player")
 end
 
--- Function to cast a spell if the conditions are met
-local function spellCast(spellID, target)
-    if ucheck(target, spellID) then
-        ni.spell.cast(spellID, target)
-    end
-end
-
+-- Function Dispellable Debuffs
 local function canDispel(unit)
     for i = 1, #dispellableDebuffs do
         if ni.unit.debuff(unit, dispellableDebuffs[i]) then
@@ -118,6 +129,8 @@ local function canDispel(unit)
     end
     return false
 end
+
+-- Function Line of Sight Checker
 local function losCheck()
     for i = 1, #ni.members do
         if ni.members[i]:los() then
@@ -127,22 +140,6 @@ local function losCheck()
     return false
 end
 
--- Function to find the lowest ally to be healed
-local function healAlly()
-    local lowestHealthPercent = 100
-    local lowestHealthMember = nil
-
-    for i = 1, #ni.members do
-        local healthPercent = ni.members[i]:hp()
-
-        if healthPercent < lowestHealthPercent then
-            lowestHealthPercent = healthPercent
-            lowestHealthMember = ni.members[i].guid
-        end
-    end
-
-    return lowestHealthMember
-end
 -- Function to target an enemy within range
 local function tarEnemy(range)
     local enemies = ni.unit.enemiesinrange("player", range)
@@ -161,274 +158,219 @@ local function tarEnemy(range)
     return nil
 end
 
--- Function to find the lowest ally to be healed
-local function healAlly()
-    local lowestHealthPercent = 100
-    local lowestHealthMember = nil
-
-    for i = 1, #ni.members do
-        local healthPercent = ni.members[i]:hp()
-
-        if healthPercent < lowestHealthPercent then
-            lowestHealthPercent = healthPercent
-            lowestHealthMember = ni.members[i].guid
-        end
-    end
-
-    return lowestHealthMember
-end
-
 -- Ability functions
 local abilities = {
-    ["Aura Mastery"] = function()
-        -- Cast Aura Mastery if you or an ally have 65% hp or less, it's off cooldown, and ucheck passes
-        local spellID = spellIDs["Aura Mastery"]
-        if spellID then
-            local threshold = values["Aura MasteryThreshold"]
-            if ni.unit.hp("player") <= threshold and ni.spell.available(spellID) then
-                spellCast(spellID, "player")
-            end
-        end
-    end,
-
-    ["Divine Illumination"] = function()
-        -- Cast Divine Illumination if you have 65% mana or less, it's off cooldown, and ucheck passes
-        local spellID = spellIDs["Divine Illumination"]
-        if spellID then
-            local threshold = values["Divine IlluminationThreshold"]
-            if ni.unit.power("player", "percent") <= threshold and ni.spell.available(spellID) then
-                spellCast(spellID, "player")
-            end
-        end
-    end,
-
+    -- Divine Shield
+    -- Casts Divine Shield on the player if their health is below the threshold and they do not have the Forbearance debuff.
     ["Divine Shield"] = function()
-        -- Cast Divine Shield if you have 35% hp or less, it's off cooldown, you don't have the "Forbearance" debuff, and ucheck passes
-        local spellID = spellIDs["Divine Shield"]
-        if spellID then
-            local threshold = values["Divine ShieldThreshold"]
-            local hasForbearance = ni.unit.debuff("player", spellIDs["Forbearance"], "exact")
-            if ni.unit.hp("player") <= threshold and ni.spell.available(spellID) and not hasForbearance then
+        if ni.unit.hp("player") <= values["Divine ShieldThreshold"] and not ni.unit.debuff("player", spellIDs["Forbearance"], "exact") and ucheck("player", spellIDs["Divine Shield"]) and ni.spell.available(spellIDs["Divine Shield"]) then
+            if UnitCastingInfo("player") or UnitChannelInfo("player") then
                 ni.spell.stopcasting()
-                spellCast(spellID, "player")
             end
+            ni.spell.cast(spellIDs["Divine Shield"], "player")
+            return true
         end
+        return false
     end,
 
-    ["Hand of Protection"] = function()
-        -- Cast Hand of Protection on the ally with 40% hp or less if it's off cooldown, line of sight is available, and ucheck passes
-        local spellID = spellIDs["Hand of Protection"]
-        if spellID then
-            local threshold = values["Hand of ProtectionThreshold"]
-            local lowHealthMember = healAlly()
-            if lowHealthMember and ni.spell.available(spellID) and losCheck() then
-                ni.spell.stopcasting()
-                spellCast(spellID, lowHealthMember)
-            end
-        end
-    end,
-
+     -- Divine Protection
+    -- Casts Divine Protection on the player if their health is below the threshold and Divine Shield is not available.
     ["Divine Protection"] = function()
-        -- Cast Divine Protection if you have 40% hp or less, Divine Shield is on cooldown, and ucheck passes
-        local spellID = spellIDs["Divine Protection"]
-        if spellID then
-            local threshold = values["Divine ProtectionThreshold"]
-            if ni.unit.hp("player") <= threshold and not ni.spell.available(spellIDs["Divine Shield"]) then
-                ni.spell.stopcasting()
-                spellCast(spellID, "player")
-            end
+        if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.spell.available(spellIDs["Divine Shield"]) and ucheck("player", spellIDs["Divine Protection"]) and ni.spell.available(spellIDs["Divine Protection"]) then
+            ni.spell.stopcasting()
+            ni.spell.cast(spellIDs["Divine Protection"], "player")
+            return true
         end
+        return false
     end,
 
+    -- Hand of Protection
+    -- Casts Hand of Protection on any group member if their health is below the threshold and the player has line of sight to them.
+    ["Hand of Protection"] = function()
+        for i = 1, #ni.members do
+            if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.unit.debuff(ni.members[i].guid, spellIDs["Forbearance"], "exact") and ucheck(ni.members[i].guid, spellIDs["Hand of Protection"]) and ni.spell.available(spellIDs["Hand of Protection"]) and ni.members[i]:los() then
+                ni.spell.stopcasting()
+                ni.spell.cast(spellIDs["Hand of Protection"], ni.members[i].guid)
+                return true
+            end
+        end
+        return false
+    end,
+
+    -- Lay on Hands
+    -- Casts Lay on Hands on any group member if their health is below the threshold and the player has line of sight to them.
     ["Lay on Hands"] = function()
-        -- Cast Lay on Hands on the ally with the lowest health if they have 25% hp or less, it's off cooldown, you don't have the "Forbearance" debuff, and ucheck passes
-        local spellID = spellIDs["Lay on Hands"]
-        if spellID then
-            local threshold = values["Lay on HandsThreshold"]
-            local lowHealthMember = healAlly()
-            local hasForbearance = ni.unit.debuff("player", spellIDs["Forbearance"], "exact")
-            if lowHealthMember and ni.spell.available(spellID) and not hasForbearance then
+        for i = 1, #ni.members do
+            if ni.members[i]:hp() <= values["Lay on HandsThreshold"] and not ni.unit.debuff(ni.members[i].guid, spellIDs["Forbearance"], "exact") and ucheck(ni.members[i].guid, spellIDs["Lay on Hands"]) and ni.spell.available(spellIDs["Lay on Hands"]) and ni.members[i]:los() then
                 ni.spell.stopcasting()
-                spellCast(spellID, lowHealthMember)
+                ni.spell.cast(spellIDs["Lay on Hands"], ni.members[i].guid)
+                return true
             end
         end
+        return false
     end,
 
+    -- Aura Mastery
+    -- Casts Aura Mastery if the player's health is below the threshold.
+    ["Aura Mastery"] = function()
+        if ni.unit.hp("player") <= values["Aura MasteryThreshold"] and ucheck("player", spellIDs["Aura Mastery"]) and ni.spell.available(spellIDs["Aura Mastery"]) then
+            ni.spell.cast(spellIDs["Aura Mastery"], "player")
+            return true
+        end
+        return false
+    end,
+
+    -- Divine Illumination
+    -- Casts Divine Illumination if the player's mana is below the threshold.
+    ["Divine Illumination"] = function()
+        if ni.unit.power("player", "percent") <= values["Divine IlluminationThreshold"] and ucheck("player", spellIDs["Divine Illumination"]) and ni.spell.available(spellIDs["Divine Illumination"]) then
+            ni.spell.cast(spellIDs["Divine Illumination"], "player")
+            return true
+        end
+        return false
+    end,
+
+    -- Divine Sacrifice
+    -- Casts Divine Sacrifice on any group member if their health is below the threshold and the player has line of sight to them.
     ["Divine Sacrifice"] = function()
-        -- Cast Divine Sacrifice on an ally if they have 75% hp or less and ucheck passes
-        local spellID = spellIDs["Divine Sacrifice"]
-        if spellID then
-            local threshold = values["Divine SacrificeThreshold"]
-            local lowHealthMember = healAlly()
-            if lowHealthMember and ni.spell.available(spellID) then
-                spellCast(spellID, lowHealthMember)
+        for i = 1, #ni.members do
+            if ni.members[i]:hp() <= values["Divine SacrificeThreshold"] and ucheck(ni.members[i].guid, spellIDs["Divine Sacrifice"]) and ni.spell.available(spellIDs["Divine Sacrifice"]) and ni.members[i]:los() then
+                ni.spell.cast(spellIDs["Divine Sacrifice"], ni.members[i].guid)
+                return true
             end
         end
+        return false
     end,
 
+    -- Divine Favor
+    -- Casts Divine Favor on any group member if their health is below the threshold and the player has line of sight to them.
     ["Divine Favor"] = function()
-        -- Cast Divine Favor on the ally with the lowest health if they have 25% hp or lower, it's off cooldown, and ucheck passes
-        local spellID = spellIDs["Divine Favor"]
-        if spellID then
-            local threshold = values["Divine FavorThreshold"]
-            local lowHealthMember = healAlly()
-            if lowHealthMember and ni.spell.available(spellID) then
-                spellCast(spellID, lowHealthMember)
+        for i = 1, #ni.members do
+            if ni.members[i]:hp() <= values["Divine FavorThreshold"] and ucheck(ni.members[i].guid, spellIDs["Divine Favor"]) and ni.spell.available(spellIDs["Divine Favor"]) and ni.members[i]:los() then
+                ni.spell.cast(spellIDs["Divine Favor"], ni.members[i].guid)
+                return true
             end
         end
+        return false
     end,
 
+    -- Use Healthstone
+    -- Uses a Healthstone if the player's health is below 20%.
     ["Use Healthstone"] = function()
-        -- Use Healthstone when your health reaches 20% or less and ucheck passes
-        local spellID = spellIDs["Fel Healthstone"]
-        if spellID then
-            if ni.unit.hp("player") <= 20 and ucheck("player", spellID) then
-                ni.player.useitem(spellID)
-            end
+        local itemId = 36892 -- This is the item ID of the Healthstone
+        if ni.unit.hp("player") <= 20 and ni.player.hasitem(itemId) and ucheck("player", itemId) then
+            ni.player.useitem(itemId) -- Uses Healthstone
+            return true
         end
+        return false
     end,
 
+    -- Hammer of Wrath
+    -- Casts Hammer of Wrath on an enemy within 30 yards if their health is below the threshold.
     ["Hammer of Wrath"] = function()
-        -- Stop casting and cast Hammer of Wrath on an enemy that is within 30 yards, has 20% health or lower, and ucheck passes
-        local spellID = spellIDs["Hammer of Wrath"]
-        if spellID then
-            local threshold = values["Hammer of WrathThreshold"]
-            local target = tarEnemy(30) -- Set the range to 30 yards
-            if target and ni.unit.hp(target) <= threshold and ni.spell.available(spellID) then
-                ni.spell.stopcasting()
-                spellCast(spellID, target)
-            end
+        local target = tarEnemy(30) 
+        if target and ni.unit.hp(target) <= values["Hammer of WrathThreshold"] and ucheck(target, spellIDs["Hammer of Wrath"]) and ni.spell.available(spellIDs["Hammer of Wrath"]) then
+            ni.spell.cast(spellIDs["Hammer of Wrath"], target)
+            return true
         end
+        return false
     end,
 
+    -- Hammer of Justice
+    -- Casts Hammer of Justice on an enemy within 10 yards if they are casting a spell.
     ["Hammer of Justice"] = function()
-        -- Target an enemy within 10 yards and cast Hammer of Justice if the enemy is casting a spell and ucheck passes
-        local spellID = spellIDs["Hammer of Justice"]
-        if spellID then
-            local target = tarEnemy(10) -- Set the range to 10 yards
-            if target and ni.unit.iscasting(target) and ni.spell.available(spellID) then
-                ni.spell.stopcasting()
-				spellCast(spellID, target)
-            end
+        local target = tarEnemy(10) 
+        if target and ni.unit.iscasting(target) and ucheck(target, spellIDs["Hammer of Justice"]) and ni.spell.available(spellIDs["Hammer of Justice"]) then
+            ni.spell.cast(spellIDs["Hammer of Justice"], target)
+            return true
         end
+        return false
     end,
 
+	-- Hand of Freedom
+    -- Casts Hand of Freedom on any group member if they have a Snare debuff and the player has line of sight to them.
     ["Hand of Freedom"] = function()
-        -- Cast Hand of Freedom on yourself or an ally if they have 65% hp or less, have a Snare debuff, and ucheck passes
-        local spellID = spellIDs["Hand of Freedom"]
-        if spellID then
-            local threshold = values["Hand of FreedomThreshold"]
-            local lowHealthMember = healAlly()
-            if lowHealthMember and ni.spell.available(spellID) and ni.unit.debufftype(lowHealthMember, "Snare") then
-                spellCast(spellID, lowHealthMember)
+        for i = 1, #ni.members do
+            if ni.unit.debufftype(ni.members[i].guid, "Snare") and ucheck(ni.members[i].guid, spellIDs["Hand of Freedom"]) and ni.spell.available(spellIDs["Hand of Freedom"]) and ni.members[i]:los() then
+                ni.spell.cast(spellIDs["Hand of Freedom"], ni.members[i].guid)
+                return true
             end
         end
+        return false
     end,
 
+    -- Cleanse
+    -- Casts Cleanse on any group member if they have a dispellable debuff and the player has line of sight to them.
     ["Cleanse"] = function()
-        -- Cast Cleanse on the ally with the lowest health if they have a debuff that requires dispelling
-        local spellID = spellIDs["Cleanse"]
-        if spellID then
-            local lowHealthMember = healAlly()
-            if lowHealthMember and canDispel(lowHealthMember) and ni.spell.available(spellID) then
-                spellCast(spellID, lowHealthMember)
-            else
-                for i = 1, #ni.members do
-                    if canDispel(ni.members[i].guid) then
-                        spellCast(spellID, ni.members[i].guid)
-                        break
-                    end
-                end
+        for i = 1, #ni.members do
+            if canDispel(ni.members[i].guid) and ucheck(ni.members[i].guid, spellIDs["Cleanse"]) and ni.spell.available(spellIDs["Cleanse"]) and ni.members[i]:los() then
+                ni.spell.cast(spellIDs["Cleanse"], ni.members[i].guid)
+                return true
             end
         end
+        return false
     end,
 
+    -- Holy Shock
+    -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
     ["Holy Shock"] = function()
-        -- Cast Holy Shock on the ally with the lowest health if they have 88% hp or lower, it's off cooldown, and ucheck passes
-        local spellID = spellIDs["Holy Shock"]
-        if spellID then
-            local threshold = values["Holy ShockThreshold"]
-            local lowHealthMember = healAlly()
-            if lowHealthMember and ni.spell.available(spellID) then
-                spellCast(spellID, lowHealthMember)
+        for i = 1, #ni.members do
+            if ni.members[i]:hp() <= values["Holy ShockThreshold"] and ucheck(ni.members[i].guid, spellIDs["Holy Shock"]) and ni.spell.available(spellIDs["Holy Shock"]) and ni.members[i]:los() then
+                ni.spell.cast(spellIDs["Holy Shock"], ni.members[i].guid)
+                return true
             end
         end
+        return false
     end,
 
+
+    -- Flash of Light
+    -- Casts Flash of Light on any group member if the player is not moving or has the Infusion of Light buff, their health is below the threshold, and the player has line of sight to them.
     ["Flash of Light"] = function()
-        -- Cast Flash of Light on the ally with the lowest health if they have 88% hp or lower, it's off cooldown, and the player is either not moving or has the Infusion of Light buff.
-        -- If the player does not have the Infusion of Light buff, they must have been stationary for at least 0.1 seconds before the spell is cast.
-        local spellID = spellIDs["Flash of Light"]
-        local infusionOfLightID = spellIDs["Infusion of Light"]
-        if spellID then
-            local threshold = values["Flash of LightThreshold"]
-            local lowHealthMember = healAlly()
-            local isMoving = ni.player.movingfor(0.1)
-            local hasInfusionOfLight = ni.unit.buff("player", infusionOfLightID, "exact")
-            if lowHealthMember and ni.spell.available(spellID) and (not isMoving or hasInfusionOfLight) then
-                spellCast(spellID, lowHealthMember)
+        local isMoving = ni.player.movingfor(0.1)
+        local hasInfusionOfLight = ni.unit.buff("player", spellIDs["Infusion of Light"], "exact")
+        for i = 1, #ni.members do
+            if (not isMoving or hasInfusionOfLight) and ni.members[i]:hp() <= values["Flash of LightThreshold"] and ucheck(ni.members[i].guid, spellIDs["Flash of Light"]) and ni.spell.available(spellIDs["Flash of Light"]) and ni.members[i]:los() then
+                ni.spell.cast(spellIDs["Flash of Light"], ni.members[i].guid)
+                return true
             end
         end
+        return false
     end,
 
+    -- Sacred Shield
+    -- Casts Sacred Shield on the player if they do not already have the Sacred Shield buff.
     ["Sacred Shield"] = function()
-        -- Cast Sacred Shield on yourself if you don't have the buff, it's off cooldown, and ucheck passes
-        local spellID = spellIDs["Sacred Shield"]
-        if spellID then
-            if not ni.unit.buff("player", spellID, "exact") and ni.spell.available(spellID) then
-                spellCast(spellID, "player")
-            end
+        if not ni.unit.buff("player", spellIDs["Sacred Shield"], "exact") and ucheck("player", spellIDs["Sacred Shield"]) and ni.spell.available(spellIDs["Sacred Shield"]) then
+            ni.spell.cast(spellIDs["Sacred Shield"], "player")
+            return true
         end
+        return false
     end,
 
+    -- Beacon of Light
+    -- Casts Beacon of Light on the player if they do not already have the Beacon of Light buff.
     ["Beacon of Light"] = function()
-        -- Cast Beacon of Light on yourself if you don't have the buff, it's off cooldown, and ucheck passes
-        local spellID = spellIDs["Beacon of Light"]
-        if spellID then
-            if not ni.unit.buff("player", spellID, "exact") and ni.spell.available(spellID) then
-                spellCast(spellID, "player")
-            end
+        if not ni.unit.buff("player", spellIDs["Beacon of Light"], "exact") and ucheck("player", spellIDs["Beacon of Light"]) and ni.spell.available(spellIDs["Beacon of Light"]) then
+            ni.spell.cast(spellIDs["Beacon of Light"], "player")
+            return true
         end
+        return false
     end,
 
+    -- Blessing of Kings
+    -- If we do not have Blessing of Kings buff, buff self
+    -- If we have Greater of Blessing of Kings, do not override buff by cast Blessing of Kings
     ["Blessing of Kings"] = function()
-		-- Do not cast Blessing of Kings if we have Greater Blessing of Kings already, it's off cooldown, and ucheck passes
-		-- Cast Blessing of Kings on yourself as self-buff if Greater Blessing of Kings is not active, it's off cooldown, and ucheck passes
-		local greaterBlessingID = spellIDs["Greater Blessing of Kings"]
-		local hasGreaterBlessing = ni.unit.buff("player", greaterBlessingID, "exact")
-		
-		local spellID = spellIDs["Blessing of Kings"]
-		if spellID and greaterBlessingID and not hasGreaterBlessing and ni.spell.available(spellID) then
-			spellCast(spellID, "player")
-		end
-	end,
-
-
-
-
-    ["Seal of Wisdom"] = function()
-        -- Cast Seal of Wisdom on yourself if you have 35% mana or less, it's not already active, it's off cooldown, and ucheck passes
-        local spellID = spellIDs["Seal of Wisdom"]
-        if spellID then
-            local threshold = values["Seal of WisdomThreshold"]
-            if ni.unit.power("player", "percent") <= threshold and not ni.unit.buff("player", spellID, "exact") and ni.spell.available(spellID) then
-                spellCast(spellID, "player")
-            end
+        local hasGreaterBlessing = ni.unit.buff("player", spellIDs["Greater Blessing of Kings"])
+        local hasBlessing = ni.unit.buff("player", spellIDs["Blessing of Kings"])
+        if not hasBlessing and not hasGreaterBlessing and ucheck("player", spellIDs["Blessing of Kings"]) and ni.spell.available(spellIDs["Blessing of Kings"]) then
+            ni.spell.cast(spellIDs["Blessing of Kings"], "player")
+            return true
         end
-    end,
-
-    ["Seal of Light"] = function()
-        -- Cast Seal of Light on yourself if you have 70% mana or more, it's not already active, it's off cooldown, and ucheck passes
-        local spellID = spellIDs["Seal of Light"]
-        if spellID then
-            local threshold = values["Seal of LightThreshold"]
-            if ni.unit.power("player", "percent") >= threshold and not ni.unit.buff("player", spellID, "exact") and ni.spell.available(spellID) then
-                spellCast(spellID, "player")
-            end
-        end
+        return false
     end,
 }
-
 
 
 local function OnLoad()
