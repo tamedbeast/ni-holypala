@@ -1,18 +1,18 @@
 local queue = {
-	"Divine Shield",
-	"Lay on Hands",
-	"Divine Protection",
-	"Hand of Protection",
-	"Divine Sacrifice",
+    "Divine Shield",
+    "Lay on Hands",
+    "Divine Protection",
+    "Hand of Protection",
+    "Divine Sacrifice",
     "Hand of Sacrifice",
     "Use Healthstone",
     "Sacred Shield",
     "Beacon of Light",
-	"Aura Mastery",
-	"Divine Favor",
+    "Aura Mastery",
+    "Divine Favor",
     "Divine Illumination",
     "Hand of Freedom",
-	"Hammer of Wrath",
+    "Hammer of Wrath",
     "Hammer of Justice",
     "Holy Shock",
     "Flash of Light",
@@ -22,32 +22,32 @@ local queue = {
 }
 
 local values = {
-	["Divine ShieldThreshold"] = 30,
-	["Hand of ProtectionThreshold"] = 30,
+    ["Divine ShieldThreshold"] = 30,
+    ["Hand of ProtectionThreshold"] = 30,
     ["Lay on HandsThreshold"] = 30,
-	["Divine ProtectionThreshold"] = 30,
+    ["Divine ProtectionThreshold"] = 30,
     ["Divine SacrificeThreshold"] = 50,
-	["Hand of SacrificeThreshold"] = 65,
-	["Use HealthstoneThreshold"] = 20,
-	["Hammer of WrathThreshold"] = 20,
-	--["Hammer of JusticeThreshold] = 0,
+    ["Hand of SacrificeThreshold"] = 65,
+    ["Use HealthstoneThreshold"] = 20,
+    ["Hammer of WrathThreshold"] = 20,
+    --["Hammer of JusticeThreshold] = 0,
     ["Aura MasteryThreshold"] = 65,
     ["Divine FavorThreshold"] = 75,
-	["Divine IlluminationThreshold"] = 65,
+    ["Divine IlluminationThreshold"] = 65,
     --["Hand of FreedomThreshold"] = 0,
     ["Hand of FreedomThreshold"] = 65,
-	["Holy ShockThreshold"] = 88,
+    ["Holy ShockThreshold"] = 88,
     ["Flash of LightThreshold"] = 88,
     --["CleanseThreshold"] = 0,
-	--["Sacred Shield"] = 0,
-	--["Beacon of Light"] = 0,
+    --["Sacred Shield"] = 0,
+    --["Beacon of Light"] = 0,
     --["Greater Blessing of Kings"] = 0,
     --["Blessing of Kings"] = 0,
-
-	
 }
+
 local dispellableDebuffs = {
 }
+
 local HoFDebuff = {
     "Frost Nova",
     "Frostbite",
