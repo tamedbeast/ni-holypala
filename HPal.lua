@@ -186,7 +186,7 @@ local abilities = {
     -- Divine Shield
     -- Casts Divine Shield on the player if their health is below the threshold.
     ["Divine Shield"] = function()
-        if ni.unit.hp("player") <= values["Divine ShieldThreshold"] 
+        if ni.unit.ttd("player") < 2 
             and not ni.unit.debuff("player", "Forbearance") 
             and ucheck() 
             and ni.spell.available("Divine Shield") 
@@ -206,7 +206,7 @@ local abilities = {
     -- Casts Lay on Hands on any group member if their health is below the threshold.	
     ["Lay on Hands"] = function()
         for i = 1, #ni.members do
-            if ni.members[i]:hp() <= values["Lay on HandsThreshold"] 
+            if ni.unit.ttd("ni.members[i].guid") < 2  
                 and not ni.members[i]:debuff("Forbearance") 
                 and ucheck() 
                 and ni.spell.available("Lay on Hands") 
@@ -227,7 +227,7 @@ local abilities = {
     -- Divine Protection
     -- Casts Divine Protection on the player if their health is below the threshold.
     ["Divine Protection"] = function()
-        if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] 
+        if ni.unit.ttd("player") < 2  
 			and not ni.unit.debuff("player", "Forbearance") 
             and ucheck() 
             and ni.spell.available("Divine Protection") 
@@ -247,7 +247,7 @@ local abilities = {
     -- Casts Hand of Protection on any group member if their health is below the threshold.	
     ["Hand of Protection"] = function()
         for i = 1, #ni.members do
-            if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"]
+            if ni.unit.ttd("ni.members[i].guid") < 2 
 				and not ni.members[i]:debuff("Forbearance") 
                 and ucheck() 
                 and ni.spell.available("Hand of Protection")
