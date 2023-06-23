@@ -345,7 +345,7 @@ local abilities = {
 			end
 		end
 		return false
-	end
+	end,
 
 	-- Cleanse
 	-- Casts Cleanse on any group member if they have a dispellable debuff and the player has line of sight to them.
@@ -358,7 +358,7 @@ local abilities = {
 			end
 		end
 		return false
-	end
+	end,
 
     -- Holy Shock
     -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
