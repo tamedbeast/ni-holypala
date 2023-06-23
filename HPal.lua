@@ -56,7 +56,27 @@ local HoFDebuff = {
     "Piercing Howl",
     "Improved Wing Clip",
     "Improved Hamstring",
-    "Frostfire Bolt"
+    "Frostfire Bolt",
+    "Mind-numbing Poison",
+    "Curse of Tongues",
+    "Slow",
+    "Sap",
+    "Garrote - Silence",
+    "Kidney Shot",
+    "Gouge",
+    "Blind",
+    "Polymorph",
+    "Repentance",
+    "Intimidating Shout",
+    "Howl of Terror",
+    "Psychic Scream",
+    "Fear",
+    "Hex",
+    "Turn Evil",
+    "Seduction",
+    "Wyvern Sting",
+    "Mortal Coil",
+    "Sap"
 }
 
 local CleanseDebuff = {
@@ -80,8 +100,19 @@ local CleanseDebuff = {
     "Repentance",
     "Frostbolt",
     "Freeze",
-    "Wound Poison"
+    "Wound Poison",
+    "Arcane Torrent",
+    "Strangulate",
+    "Silence",
+    "Garrote - Silence",
+    "Counterspell",
+    "Silencing Shot",
+    "Pummel",
+    "Skull Bash",
+    "Kick",
+    "Wind Shear"
 }
+
 
 -- Local Containers
 local enables = {}
@@ -303,33 +334,31 @@ local abilities = {
 		return false
 	end,
 
-	
 	-- Hand of Freedom
 	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
 	["Hand of Freedom"] = function()
 		for i = 1, #ni.members do
-			if ni.members[i]:combat() and (ni.members[i]:debufftype("Snare") or ni.members[i]:debufftype("Root") or ni.members[i]:debufftype("Stun")) and ucheck() and ni.spell.available("Hand of Freedom") and ni.members[i]:valid("Hand of Freedom", false, true) then
+			if ni.members[i]:combat() and ni.spell.debuff(ni.members[i].guid, HoFDebuff) and ucheck() and ni.spell.available("Hand of Freedom") and ni.members[i]:valid("Hand of Freedom", false, true) then
 				ni.spell.cast("Hand of Freedom", ni.members[i].guid)
 				print("Hand of Freedom")
 				return true
 			end
 		end
 		return false
-	end,
+	end
 
 	-- Cleanse
 	-- Casts Cleanse on any group member if they have a dispellable debuff and the player has line of sight to them.
 	["Cleanse"] = function()
 		for i = 1, #ni.members do
-			if ni.healing.candispel(ni.members[i].guid) and not ni.healing.dontdispel(ni.members[i].guid) and ucheck() and ni.spell.available("Cleanse") and ni.members[i]:valid("Cleanse", false, true) then
+			if ni.healing.candispel(ni.members[i].guid) and not ni.healing.dontdispel(ni.members[i].guid) and ucheck() and ni.spell.available("Cleanse") and ni.spell.debuff(ni.members[i].guid, CleanseDebuff) and ni.members[i]:valid("Cleanse", false, true) then
 				ni.spell.cast("Cleanse", ni.members[i].guid)
 				print("Cleanse")
 				return true
 			end
 		end
 		return false
-	end,
-
+	end
 
     -- Holy Shock
     -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
