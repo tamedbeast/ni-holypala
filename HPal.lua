@@ -39,18 +39,48 @@ local values = {
 	["Hammer of WrathThreshold"] = 20,
 }
 local dispellableDebuffs = {
-    "Concussive Shot",
-    "Wing Clip",
-    "Hamstring",
-    "Improved Hamstring",
-    "Frost Shock",
-    "Crippling Poison",
-    "Frostbolt",
+}
+local HoFDebuff = {
     "Frost Nova",
-    "Chilled",
-    "Slow",
-    "Deadly Throw",
-    "Frostbrand Attack"
+    "Frostbite",
+    "Cone of Cold",
+    "Entangling Roots",
+    "Hamstring",
+    "Crippling Poison",
+    "Chains of Ice",
+    "Infected Wounds",
+    "Earthbind",
+    "Curse of Exhaustion",
+    "Wing Clip",
+    "Frost Shock",
+    "Piercing Howl",
+    "Improved Wing Clip",
+    "Improved Hamstring",
+    "Frostfire Bolt"
+}
+
+local CleanseDebuff = {
+    "Viper Sting",
+    "Serpent Sting",
+    "Corruption",
+    "Curse of Agony",
+    "Curse of the Elements",
+    "Curse of Tongues",
+    "Curse of Weakness",
+    "Frost Fever",
+    "Blood Plague",
+    "Deadly Poison",
+    "Mind Flay",
+    "Shadow Word: Pain",
+    "Devouring Plague",
+    "Polymorph",
+    "Fear",
+    "Psychic Scream",
+    "Hex",
+    "Repentance",
+    "Frostbolt",
+    "Freeze",
+    "Wound Poison"
 }
 
 -- Local Containers
@@ -96,7 +126,7 @@ end
 -- Function to check if the player is eligible to cast a spell
 local function ucheck()
     return not IsMounted() and not UnitInVehicle("player") and not UnitIsDeadOrGhost("player")
-        and not UnitChannelInfo("player") and not UnitCastingInfo("player") and not ni.unit.isstunned("player") and not ni.unit.issilenced("player") and not ni.unit.ispacified("player") and not ni.unit.isdisarmed("player") and not ni.unit.isfleeing("player") and not ni.unit.ispossessed("player") and not ni.unit.isimmune("player")
+        and not UnitChannelInfo("player") and not UnitCastingInfo("player") and not ni.unit.isstunned("player") and not ni.unit.issilenced("player") and not ni.unit.ispacified("player") and not ni.unit.isdisarmed("player") and not ni.unit.isfleeing("player") and not ni.unit.ispossessed("player") and not ni.unit.buff("player", "Polymorph")
 end
 
 -- Ability functions
@@ -115,6 +145,8 @@ local abilities = {
 		return false
 	end,	
 	
+	-- Divine Protection
+	-- Casts Divine Protection on the player if their health is below the threshold.
 	["Divine Protection"] = function()
 		if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] and not ni.unit.debuff("player", "Forbearance") and ucheck() and not ni.spell.available("Divine Shield") and ni.spell.available("Divine Protection") and UnitAffectingCombat("player") then
 			if UnitCastingInfo("player") or UnitChannelInfo("player") then
@@ -128,7 +160,7 @@ local abilities = {
 	end,
 
 	-- Hand of Protection
-	-- Casts Hand of Protection on any group member if their health is below the threshold and the player has line of sight to them, and they do not have the Forbearance debuff.
+	-- Casts Hand of Protection on any group member if their health is below the threshold.
 	["Hand of Protection"] = function()
 		for i = 1, #ni.members do
 			if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] and not ni.members[i]:debuff("Forbearance") and ucheck() and ni.spell.available("Hand of Protection") and ni.members[i]:valid("Hand of Protection", false, true) and ni.members[i]:combat() then
@@ -145,10 +177,10 @@ local abilities = {
 
 
     -- Lay on Hands
-    -- Casts Lay on Hands on any group member if their health is below the threshold and the player has line of sight to them.
+    -- Casts Lay on Hands on any group member if their health is below the threshold.
 	["Lay on Hands"] = function()
 		for i = 1, #ni.members do
-			if ni.members[i]:hp() <= values["Lay on HandsThreshold"] and not ni.members[i]:debuff("Forbearance") and ucheck() and ni.spell.available("Lay on Hands") and ni.members[i]:valid("Lay on Hands") and ni.members[i]:combat() then
+			if ni.members[i]:hp() <= values["Lay on HandsThreshold"] and not ni.members[i]:debuff("Forbearance") and ucheck() and ni.spell.available("Lay on Hands") and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection")) and ni.members[i]:valid("Lay on Hands") and ni.members[i]:combat() then
 				if UnitCastingInfo("player") or UnitChannelInfo("player") then
 					ni.spell.stopcasting()
 				end
@@ -164,7 +196,8 @@ local abilities = {
 	-- Casts Hand of Sacrifice on any group member if their health is below the threshold, the player is in combat, and they pass the ucheck conditions.
 	["Hand of Sacrifice"] = function()
 		for i = 1, #ni.members do
-			if ni.members[i]:hp() <= values["Hand of SacrificeThreshold"] and ucheck() and ni.spell.available("Hand of Sacrifice") and ni.members[i]:valid("Hand of Sacrifice") and ni.members[i]:combat() then
+			if ni.members[i]:hp() <= values["Hand of SacrificeThreshold"] and ucheck() and ni.spell.available("Hand of Sacrifice") and ni.members[i]:valid("Hand of Sacrifice") and ni.members[i]:combat() and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
+			then
 				ni.spell.cast("Hand of Sacrifice", ni.members[i].guid)
 				print("Hand of Sacrifice")
 				return true
@@ -176,7 +209,8 @@ local abilities = {
     -- Aura Mastery
     -- Casts Aura Mastery if the player's health is below the threshold.
     ["Aura Mastery"] = function()
-		if ni.unit.hp("player") <= values["Aura MasteryThreshold"] and ucheck() and ni.spell.available("Aura Mastery") and UnitAffectingCombat("player") then
+		if ni.unit.hp("player") <= values["Aura MasteryThreshold"] and
+        ni.unit.buff("player", "Concentration Aura") and ucheck() and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection")) and ni.spell.available("Aura Mastery") and UnitAffectingCombat("player") then
 			ni.spell.cast("Aura Mastery", "player")
 			print("Aura Mastery")
 			return true
