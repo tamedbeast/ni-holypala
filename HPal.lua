@@ -50,6 +50,7 @@ local dispellableDebuffs = {
 
 local HoFDebuff = {
     "Frost Nova",
+	"Desecration",
     "Frostbite",
     "Cone of Cold",
     "Entangling Roots",
@@ -175,9 +176,9 @@ local function ucheck()
         not ni.unit.isdisarmed("player") and
         not ni.unit.isfleeing("player") and
         not ni.unit.ispossessed("player") and
-        not ni.unit.buff("player", "Polymorph") and
-		not ni.unit.buff("player", "Cyclone")
-		
+        not ni.unit.debuff("player", "Polymorph") and
+		not ni.unit.debuff("player", "Cyclone") and
+		not ni.unit.debuff("player", "Fear")
 end
 
 
@@ -186,7 +187,7 @@ local abilities = {
     -- Divine Shield
     -- Casts Divine Shield on the player if their health is below the threshold.
     ["Divine Shield"] = function()
-        if ni.unit.ttd("player") < 2 
+        if ni.unit.hp("player") <= values["Divine ShieldThreshold"] 
             and not ni.unit.debuff("player", "Forbearance") 
             and ucheck() 
             and ni.spell.available("Divine Shield") 
@@ -202,32 +203,33 @@ local abilities = {
         return false
     end,
 	
-    -- Lay on Hands
-    -- Casts Lay on Hands on any group member if their health is below the threshold.	
-    ["Lay on Hands"] = function()
-        for i = 1, #ni.members do
-            if ni.unit.ttd("ni.members[i].guid") < 2  
-                and not ni.members[i]:debuff("Forbearance") 
-                and ucheck() 
-                and ni.spell.available("Lay on Hands") 
-                and ni.members[i]:valid("Lay on Hands", false, true) 
-                and ni.members[i]:combat() 
-            then
-                if UnitCastingInfo("player") or UnitChannelInfo("player") then
-                    ni.spell.stopcasting()
-                end
-                ni.spell.cast("Lay on Hands", ni.members[i].guid)
-                print("Lay on Hands")
-                return true
-            end
-        end
-        return false
-    end,
+	-- Lay on Hands
+	-- Casts Lay on Hands on any group member if their health is below the threshold.    
+	["Lay on Hands"] = function()
+		for i = 1, #ni.members do
+			if ni.members[i]:hp() <= values["Lay on HandsThreshold"]
+				and not ni.members[i]:debuff("Forbearance") 
+				and ucheck() 
+				and ni.spell.available("Lay on Hands") 
+				and ni.members[i]:valid("Lay on Hands", false, true) 
+				and ni.members[i]:combat() 
+			then
+				if UnitCastingInfo("player") or UnitChannelInfo("player") then
+					ni.spell.stopcasting()
+				end
+				ni.spell.cast("Lay on Hands", ni.members[i].guid)
+				print("Lay on Hands")
+				return true
+			end
+		end
+		return false
+	end,
+
 	
     -- Divine Protection
     -- Casts Divine Protection on the player if their health is below the threshold.
     ["Divine Protection"] = function()
-        if ni.unit.ttd("player") < 2  
+        if ni.unit.hp("player") <= values["Divine ProtectionThreshold"] 
 			and not ni.unit.debuff("player", "Forbearance") 
             and ucheck() 
             and ni.spell.available("Divine Protection") 
@@ -247,7 +249,7 @@ local abilities = {
     -- Casts Hand of Protection on any group member if their health is below the threshold.	
     ["Hand of Protection"] = function()
         for i = 1, #ni.members do
-            if ni.unit.ttd("ni.members[i].guid") < 2 
+            if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"]
 				and not ni.members[i]:debuff("Forbearance") 
                 and ucheck() 
                 and ni.spell.available("Hand of Protection")
@@ -287,9 +289,10 @@ local abilities = {
 	-- Hand of Sacrifice
 	-- Casts Hand of Sacrifice on any group member if their health is below the threshold, the player is in combat, and they pass the ucheck conditions.
 	["Hand of Sacrifice"] = function()
+		local playerGUID = UnitGUID("player")
 		for i = 1, #ni.members do
 			local member = ni.members[i]
-			if member ~= ni.player
+			if member.guid ~= playerGUID
 				and member:hp() <= values["Hand of SacrificeThreshold"]
 				and not member:debuff("Forbearance")
 				and ucheck()
@@ -305,7 +308,6 @@ local abilities = {
 		end
 		return false
 	end,
-
 
     -- Use Healthstone
     -- Uses a Healthstone if the player's health is below 20% and passes the ucheck conditions.
@@ -326,7 +328,7 @@ local abilities = {
     -- Casts Sacred Shield on the player if they do not already have the Sacred Shield buff.
     ["Sacred Shield"] = function()
         if not ni.unit.buff("player", "Sacred Shield") 
-            and ucheck("player", "Sacred Shield") 
+            and ucheck
             and ni.spell.available("Sacred Shield") 
         then
             ni.spell.cast("Sacred Shield", "player")
@@ -340,7 +342,7 @@ local abilities = {
     -- Casts Beacon of Light on the player if they do not already have the Beacon of Light buff.
     ["Beacon of Light"] = function()
         if not ni.unit.buff("player", "Beacon of Light") 
-            and ucheck("player", "Beacon of Light") 
+            and ucheck
             and ni.spell.available("Beacon of Light") 
         then
             ni.spell.cast("Beacon of Light", "player")
