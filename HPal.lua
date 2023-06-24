@@ -521,26 +521,30 @@ local abilities = {
 	-- Blessing of Kings
 	-- If we do not have Blessing of Kings buff, buff self
 	-- If we have Greater of Blessing of Kings, do not override buff by cast Blessing of Kings
+	-- If we have Preparation buff, cast Greater Blessing of Kings to everyone nearby
 	["Blessing of Kings"] = function()
 		if enables["Blessing of Kings"] then
 			local hasGreaterBlessing = ni.unit.buff("player", "Greater Blessing of Kings")
 			local hasBlessing = ni.unit.buff("player", "Blessing of Kings")
-			if not hasBlessing 
-				and not hasGreaterBlessing 
-				and ucheck("player", "Blessing of Kings") 
-				and ni.spell.available("Blessing of Kings") 
-			then
+			local hasPreparation = ni.unit.buff("player", 44521) -- Preparation buff
+			if not hasBlessing and not hasGreaterBlessing and ucheck("player", "Blessing of Kings") and ni.spell.available("Blessing of Kings") then
 				ni.spell.cast("Blessing of Kings", "player")
 				print("Blessing of Kings")
+				return true
+			elseif hasPreparation and ucheck("player", "Greater Blessing of Kings") and ni.spell.available("Greater Blessing of Kings") then
+				-- Cast Greater Blessing of Kings to everyone nearby
+				for i = 1, #ni.members do
+					if ni.members[i]:range(30) and ni.members[i]:valid("Greater Blessing of Kings", false, true) then
+						ni.spell.cast("Greater Blessing of Kings", ni.members[i].guid)
+						print("Greater Blessing of Kings cast on ", ni.members[i].name)
+					end
+				end
 				return true
 			end
 		end
 		return false
 	end,
-
 }
-
-
 
 local function OnLoad()
     ni.GUI.AddFrame("HPal", items)
