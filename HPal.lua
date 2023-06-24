@@ -122,21 +122,22 @@ end
 
 -- Function to check if the player is eligible to cast a spell
 local function ucheck()
-    return not ni.unit.ismounted("player") and
-        not ni.unit.invehicle("player") and
-        not ni.unit.isdeadorghost("player") and
-        not ni.unit.casting("player") and
-        not ni.unit.channeling("player") and
+    return not IsMounted() and
+        not UnitInVehicle("player") and
+        not UnitIsDeadOrGhost("player") and
+        not UnitChannelInfo("player") and
+        not UnitCastingInfo("player") and
         not ni.unit.isstunned("player") and
         not ni.unit.issilenced("player") and
         not ni.unit.ispacified("player") and
         not ni.unit.isdisarmed("player") and
         not ni.unit.isfleeing("player") and
-        not ni.unit.controlled("player") and
+        not ni.unit.ispossessed("player") and
         not ni.unit.debuff("player", "Polymorph") and
 		not ni.unit.debuff("player", "Cyclone") and
 		not ni.unit.debuff("player", "Fear")
 end
+
 
 -- Ability functions
 local abilities = {
