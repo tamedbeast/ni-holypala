@@ -4,7 +4,7 @@ This project is a World of Warcraft bot script specifically designed for healing
 
 The script is tailored for the World of Warcraft Wrath of the Lich King, patch 3.3.5a. It has been tested on the Warmane server, Blackrock realm.
 
-![WoWScrnShot_062523_084950](https://github.com/nelbin4/ni-holypala/assets/20941975/c2063196-f1e5-4bd3-8b94-7a6a25104580)
+![WoWScrnShot_062523_084950](https://github.com/nelbin4/ni-holypala/assets/20941975/e5941888-2b67-4bb9-b27e-8ac87a92d3af)
 
 ## Features
 
