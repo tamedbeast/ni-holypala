@@ -166,7 +166,7 @@ local abilities = {
 	-- Casts Lay on Hands on any group member if their health is below the threshold.    
 	["Lay on Hands"] = function()
 		if enables["Lay on Hands"] then
-			for i = 1, #ni.members do
+			for i = 1, #ni.members.sort() do
 				if ni.members[i]:hp() <= values["Lay on HandsThreshold"]
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
@@ -209,7 +209,7 @@ local abilities = {
 
     ["Hand of Protection"] = function()
 		if enables["Hand of Protection"] then
-			for i = 1, #ni.members do
+			for i = 1, #ni.members.sort() do
 				if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"]
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
@@ -232,7 +232,7 @@ local abilities = {
 	-- Casts Divine Sacrifice on any group member if their health is below the threshold and the player has line of sight to them.
 	["Divine Sacrifice"] = function()
 		if enables["Divine Sacrifice"] and #ni.members > 1 then
-			for i = 1, #ni.members do
+			for i = 1, #ni.members.sort() do
 				if ni.members.inrangebelow("player", 30, values["Divine SacrificeThreshold"])
 					and ucheck() 
 					and ni.spell.available("Divine Sacrifice") 
@@ -252,7 +252,7 @@ local abilities = {
 	-- Casts Hand of Sacrifice on any group member if their health is below the threshold, the player is in combat, and they pass the ucheck conditions.
 		["Hand of Sacrifice"] = function()
 		if enables["Hand of Sacrifice"] then
-			for i = 1, #ni.members do
+			for i = 1, #ni.members.sort() do
 				local member = ni.members[i]
 				if member.unit ~= "player"
 					and member:hp() <= values["Hand of SacrificeThreshold"]
@@ -396,7 +396,7 @@ local abilities = {
 	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
 	["Hand of Freedom"] = function()
         if enables["Hand of Freedom"] then
-            for i = 1, #ni.members do
+            for i = 1, #ni.members.sort() do
                 if ni.members[i]:combat() 
                     and ni.healing.candispel(ni.members[i].guid) 
                     and ucheck() 
@@ -442,7 +442,7 @@ local abilities = {
     -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
     ["Holy Shock"] = function()
         if enables["Holy Shock"] then
-            for i = 1, #ni.members do
+            for i = 1, #ni.members.sort() do
                 if ni.members[i]:hp() <= values["Holy ShockThreshold"]
                     and ni.members[i]:range(40)
                     and ucheck() 
@@ -464,7 +464,7 @@ local abilities = {
         if enables["Flash of Light"] then
             local isMoving = ni.player.movingfor(0.1)
             local hasInfusionOfLight = ni.unit.buff("player", "Infusion of Light")
-            for i = 1, #ni.members do
+            for i = 1, #ni.members.sort() do
                 if (not isMoving or hasInfusionOfLight) 
                     and ni.members[i]:hp() <= values["Flash of LightThreshold"] 
                     and ucheck() 
@@ -484,7 +484,7 @@ local abilities = {
     -- Casts Holy Light on any group member if their health is below the threshold and the player has line of sight to them.
     ["Holy Light"] = function()
         if enables["Holy Light"] then
-            for i = 1, #ni.members do
+            for i = 1, #ni.members.sort() do
                 if ni.members[i]:hp() <= values["Holy LightThreshold"]
                     and ni.members[i]:range(40)
                     and ucheck() 
@@ -504,7 +504,7 @@ local abilities = {
     -- Casts Cleanse on any group member if they have a debuff that can be cleansed and the player has line of sight to them.
     ["Cleanse"] = function()
         if enables["Cleanse"] then
-            for i = 1, #ni.members do
+            for i = 1, #ni.members.sort() do
                 if ni.healing.candispel(ni.members[i].guid) 
                     and ucheck() 
                     and ni.spell.available("Cleanse") 
