@@ -18,7 +18,7 @@ The healing bot script includes features such as:
 
 ## Getting Started
 
-This bot script is designed to be used with the [NI Program](https://github.com/darhanger/ni) developed by darhanger. Download the latest version of the NI Program (version 0.0.59) from the provided GitHub link.
+This bot script is designed to be used with the [NI Program](https://github.com/darhanger/ni) developed by darhanger. Download the latest Release version of the NI Program from the provided GitHub link.
 
 ### Installation
 
