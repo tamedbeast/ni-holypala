@@ -26,7 +26,7 @@ local values = {
     ["Hand of ProtectionThreshold"] = 35,
     ["Lay on HandsThreshold"] = 35,
     ["Divine ProtectionThreshold"] = 35,
-    ["Divine SacrificeThreshold"] = 50,
+    ["Divine SacrificeThreshold"] = 80,
     ["Hand of SacrificeThreshold"] = 65,
     ["Use HealthstoneThreshold"] = 20,
     ["Hammer of WrathThreshold"] = 20,
@@ -142,25 +142,25 @@ end
 
 -- Ability functions
 local abilities = {
-    -- Divine Shield
-    -- Casts Divine Shield on the player if their health is below the threshold.
-    ["Divine Shield"] = function()
-        if enables["Divine Shield"] 
-			and ni.unit.hp("player") <= values["Divine ShieldThreshold"] 
-            and not ni.unit.debuff("player", "Forbearance") 
-            and ucheck() 
-            and ni.spell.available("Divine Shield") 
-            and UnitAffectingCombat("player") 
-        then
-            if UnitCastingInfo("player") or UnitChannelInfo("player") then
-                ni.spell.stopcasting()
-            end
-            ni.spell.cast("Divine Shield", "player")
-            print("Divine Shield")
-            return true
-        end
-        return false
-    end,
+	-- Divine Shield
+	-- Casts Divine Shield on the player if their health is below the threshold or if TTD is less than 2 seconds.
+	["Divine Shield"] = function()
+		if enables["Divine Shield"] 
+			and ni.unit.hp("player") <= values["Divine ShieldThreshold"]
+			and not ni.unit.debuff("player", "Forbearance") 
+			and ucheck() 
+			and ni.spell.available("Divine Shield") 
+			and UnitAffectingCombat("player") 
+		then
+			if UnitCastingInfo("player") or UnitChannelInfo("player") then
+				ni.spell.stopcasting()
+			end
+			ni.spell.cast("Divine Shield", "player")
+			print("Divine Shield")
+			return true
+		end
+		return false
+	end,
 	
 	-- Lay on Hands
 	-- Casts Lay on Hands on any group member if their health is below the threshold.    
@@ -189,25 +189,27 @@ local abilities = {
 
     -- Divine Protection
     -- Casts Divine Protection on the player if their health is below the threshold.
-    ["Divine Protection"] = function()
-        if enables["Divine Protection"] 
-			and ni.unit.hp("player") <= values["Divine ProtectionThreshold"] 
-            and not ni.unit.debuff("player", "Forbearance") 
-            and ucheck() 
-            and ni.spell.available("Divine Protection") 
-            and UnitAffectingCombat("player") 
-        then
-            if UnitCastingInfo("player") or UnitChannelInfo("player") then
-                ni.spell.stopcasting()
-            end
-            ni.spell.cast("Divine Protection", "player")
-            print("Divine Protection")
-            return true
-        end
-        return false
-    end,
+	["Divine Protection"] = function()
+		if enables["Divine Protection"] 
+			and ni.unit.hp("player") <= values["Divine ProtectionThreshold"]
+			and not ni.unit.debuff("player", "Forbearance") 
+			and ucheck() 
+			and ni.spell.available("Divine Protection") 
+			and UnitAffectingCombat("player") 
+		then
+			if UnitCastingInfo("player") or UnitChannelInfo("player") then
+				ni.spell.stopcasting()
+			end
+			ni.spell.cast("Divine Protection", "player")
+			print("Divine Protection")
+			return true
+		end
+		return false
+	end,
 
-    ["Hand of Protection"] = function()
+	-- Hand of Protection
+	-- Casts Hand of Protection on any group member if their health is below the threshold or TTD is less than 2 seconds.
+	["Hand of Protection"] = function()
 		if enables["Hand of Protection"] then
 			for i = 1, #ni.members.sort() do
 				if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"]
@@ -227,20 +229,21 @@ local abilities = {
 			end
 		end
 	end,
-	
+    
     -- Divine Sacrifice
-	-- Casts Divine Sacrifice on any group member if their health is below the threshold and the player has line of sight to them.
+    -- Casts Divine Sacrifice if any group member's health is below the threshold.
 	["Divine Sacrifice"] = function()
-		if enables["Divine Sacrifice"] and #ni.members > 1 then
+		if enables["Divine Sacrifice"] then
 			for i = 1, #ni.members.sort() do
-				if ni.members.inrangebelow("player", 30, values["Divine SacrificeThreshold"])
-					and ucheck() 
-					and ni.spell.available("Divine Sacrifice") 
-					and ni.members[i]:valid("Divine Sacrifice") 
-					and ni.members[i]:combat() 
+				local member = ni.members[i]
+				if member:hp() <= values["Divine SacrificeThreshold"]
+					and ucheck()
+					and ni.spell.available("Divine Sacrifice")
+					and member:combat()
+					and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Divine Protection"))
 				then
-					ni.spell.cast("Divine Sacrifice", ni.members[i].guid)
-					print("Divine Sacrifice")
+					ni.spell.cast("Divine Sacrifice") -- Cast on self, not on the member
+					print("Divine Sacrifice cast to protect ", member.name)
 					return true
 				end
 			end
@@ -248,6 +251,7 @@ local abilities = {
 		return false
 	end,
 
+	
 	-- Hand of Sacrifice
 	-- Casts Hand of Sacrifice on any group member if their health is below the threshold, the player is in combat, and they pass the ucheck conditions.
 		["Hand of Sacrifice"] = function()
@@ -256,10 +260,10 @@ local abilities = {
 				local member = ni.members[i]
 				if member.unit ~= "player"
 					and member:hp() <= values["Hand of SacrificeThreshold"]
-					and not member:debuff("Forbearance")
 					and ucheck()
 					and ni.spell.available("Hand of Sacrifice")
 					and member:valid("Hand of Sacrifice")
+					and not ni.spell.available("Divine Sacrifice")
 					and member:combat()
 					and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
 				then
