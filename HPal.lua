@@ -26,7 +26,7 @@ local values = {
     ["Hand of ProtectionThreshold"] = 35,
     ["Lay on HandsThreshold"] = 35,
     ["Divine ProtectionThreshold"] = 35,
-    ["Divine SacrificeThreshold"] = 80,
+    ["Divine SacrificeThreshold"] = 50,
     ["Hand of SacrificeThreshold"] = 65,
     ["Use HealthstoneThreshold"] = 20,
     ["Hammer of WrathThreshold"] = 20,
@@ -138,7 +138,57 @@ local function ucheck()
 		not ni.unit.debuff("player", "Fear") and
 		not ni.unit.debuff("player", "Blind")
 end
+-----------------------------------------------------------
+local unitHealth = {}
+local unitTime = {}
 
+local function trackHealth(unit)
+    local currentHealth = UnitHealth(unit)
+    local currentTime = GetTime()
+
+    if unitHealth[unit] == nil then
+        unitHealth[unit] = {}
+        unitTime[unit] = {}
+    end
+
+    table.insert(unitHealth[unit], currentHealth)
+    table.insert(unitTime[unit], currentTime)
+
+    -- Keep only the last 10 seconds of data
+    while unitTime[unit][1] < currentTime - 10 do
+        table.remove(unitHealth[unit], 1)
+        table.remove(unitTime[unit], 1)
+    end
+end
+
+local function estimateTTD(unit)
+    local healthData = unitHealth[unit]
+
+    if healthData == nil or #healthData < 2 then
+        -- Not enough data to make a prediction
+        return math.huge
+    end
+
+    local numPoints = #healthData
+    local firstHealth = healthData[1]
+    local lastHealth = healthData[numPoints]
+    local firstTime = unitTime[unit][1]
+    local lastTime = unitTime[unit][numPoints]
+
+    local healthChange = firstHealth - lastHealth
+    local timeChange = lastTime - firstTime
+
+    if healthChange <= 0 then
+        -- The unit is not losing health
+        return math.huge
+    end
+
+    local healthLossRate = healthChange / timeChange
+    local currentHealth = UnitHealth(unit)
+
+    return currentHealth / healthLossRate
+end
+-----------------------------------------------------------
 
 -- Ability functions
 local abilities = {
@@ -146,7 +196,7 @@ local abilities = {
 	-- Casts Divine Shield on the player if their health is below the threshold or if TTD is less than 2 seconds.
 	["Divine Shield"] = function()
 		if enables["Divine Shield"] 
-			and ni.unit.hp("player") <= values["Divine ShieldThreshold"]
+			and (ni.unit.hp("player") <= values["Divine ShieldThreshold"] or estimateTTD("player") < 2) 
 			and not ni.unit.debuff("player", "Forbearance") 
 			and ucheck() 
 			and ni.spell.available("Divine Shield") 
@@ -167,7 +217,7 @@ local abilities = {
 	["Lay on Hands"] = function()
 		if enables["Lay on Hands"] then
 			for i = 1, #ni.members.sort() do
-				if ni.members[i]:hp() <= values["Lay on HandsThreshold"]
+				if (ni.members[i]:hp() <= values["Lay on HandsThreshold"] or estimateTTD("player") < 2)
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
 					and ni.spell.available("Lay on Hands") 
@@ -191,7 +241,7 @@ local abilities = {
     -- Casts Divine Protection on the player if their health is below the threshold.
 	["Divine Protection"] = function()
 		if enables["Divine Protection"] 
-			and ni.unit.hp("player") <= values["Divine ProtectionThreshold"]
+			and (ni.unit.hp("player") <= values["Divine ProtectionThreshold"] or estimateTTD("player") < 2)
 			and not ni.unit.debuff("player", "Forbearance") 
 			and ucheck() 
 			and ni.spell.available("Divine Protection") 
@@ -212,7 +262,7 @@ local abilities = {
 	["Hand of Protection"] = function()
 		if enables["Hand of Protection"] then
 			for i = 1, #ni.members.sort() do
-				if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"]
+				if (ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] or estimateTTD("player") < 2)
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
 					and ni.spell.available("Hand of Protection")
@@ -236,7 +286,8 @@ local abilities = {
 		if enables["Divine Sacrifice"] then
 			for i = 1, #ni.members.sort() do
 				local member = ni.members[i]
-				if member:hp() <= values["Divine SacrificeThreshold"]
+				if member.unit ~= "player"
+					and member:hp() <= values["Divine SacrificeThreshold"]
 					and ucheck()
 					and ni.spell.available("Divine Sacrifice")
 					and member:combat()
