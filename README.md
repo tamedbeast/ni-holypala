@@ -6,19 +6,10 @@ The script is tailored for the World of Warcraft Wrath of the Lich King, patch 3
 
 ![WoWScrnShot_062523_084950](https://github.com/nelbin4/ni-holypala/assets/20941975/e5941888-2b67-4bb9-b27e-8ac87a92d3af)
 
-## Features
-
-The healing bot script includes features such as:
-
-1. **Automated healing**: The bot is designed to continuously monitor the health of group members and cast appropriate healing spells as needed. The bot is programmed to prioritize healing based on the health percentage of group members.
-2. **Buff management**: The bot will maintain beneficial buffs on group members to improve their performance in the game. 
-3. **Debuff removal**: The bot can detect and cleanse harmful debuffs from group members.
-4. **Cooldown usage**: The bot can automatically use defensive and utility cooldowns to help ensure the survival of the group.
-5. **Spell interrupt**: The bot can interrupt enemy casting to prevent damage or harmful effects.
-
 ## Getting Started
 
-This bot script is designed to be used with the [NI Program](https://github.com/darhanger/ni) developed by darhanger. Download the latest Release version of the NI Program from the provided GitHub link.
+This bot script is designed to be used with the [NI Program](https://github.com/darhanger/ni) developed by darhanger. 
+Download the latest Release version of the NI Program from the provided GitHub link.
 
 ### Installation
 
