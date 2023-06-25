@@ -49,30 +49,29 @@ local dispellableDebuffs = {
 }
 
 local HoFDebuff = {
-    [64695] = "Earthgrab Totem",
-    [63685] = "Enhance Nova",
-    [42917] = "Frost Nova",
-    [12494] = "Frostbite",
-    [33395] = "Freeze",
-    [53313] = "Nature's Grasp",
-    [53308] = "Entangling Roots",
-    [1715] = "Hamstring",
-    [68766] = "Desecration",
-    [13810] = "Frost Trap",
-    [42842] = "Frostbolt (Max Rank)",
-    [116] = "Frostbolt (Rank 1)",
-    [42931] = "Cone of Cold",
-    [47610] = "Frostfire Bolt",
-    [59638] = "Mirror Image",
-    [7321] = "Chilled",
-    [31589] = "Slow",
-    [49236] = "Frost Shock",
-    [3600] = "Earthbind Totem",
-    [61291] = "Shadowflame",
-    [18118] = "Conflagration",
-    [58181] = "Feral Disease",
-    [3409] = "Crippling Poison",
-    [45524] = "Chains of Ice"
+    "Earthgrab Totem",
+    "Enhance Nova",
+    "Frost Nova",
+    "Frostbite",
+    "Freeze",
+    "Nature's Grasp",
+    "Entangling Roots",
+    "Hamstring",
+    "Desecration",
+    "Frost Trap",
+    "Frostbolt",
+    "Cone of Cold",
+    "Frostfire Bolt",
+    "Mirror Image",
+    "Chilled",
+    "Slow",
+    "Frost Shock",
+    "Earthbind Totem",
+    "Shadowflame",
+    "Conflagration",
+    "Feral Disease",
+    "Crippling Poison",
+    "Chains of Ice"
 }
 
 -- Local Containers
@@ -154,8 +153,8 @@ local function trackHealth(unit)
     table.insert(unitHealth[unit], currentHealth)
     table.insert(unitTime[unit], currentTime)
 
-    -- Keep only the last 10 seconds of data
-    while unitTime[unit][1] < currentTime - 10 do
+    -- Keep only the last 5 seconds of data
+    while unitTime[unit][1] < currentTime - 5 do
         table.remove(unitHealth[unit], 1)
         table.remove(unitTime[unit], 1)
     end
@@ -193,10 +192,10 @@ end
 -- Ability functions
 local abilities = {
 	-- Divine Shield
-	-- Casts Divine Shield on the player if their health is below the threshold or if TTD is less than 2 seconds.
+	-- Casts Divine Shield on the player if their health is below the threshold or if TTD is less than 2.5 seconds.
 	["Divine Shield"] = function()
 		if enables["Divine Shield"] 
-			and (ni.unit.hp("player") <= values["Divine ShieldThreshold"] or estimateTTD("player") < 2) 
+			and (ni.unit.hp("player") <= values["Divine ShieldThreshold"] or estimateTTD("player") < 2.5) 
 			and not ni.unit.debuff("player", "Forbearance") 
 			and ucheck() 
 			and ni.spell.available("Divine Shield") 
@@ -217,7 +216,7 @@ local abilities = {
 	["Lay on Hands"] = function()
 		if enables["Lay on Hands"] then
 			for i = 1, #ni.members.sort() do
-				if (ni.members[i]:hp() <= values["Lay on HandsThreshold"] or estimateTTD("player") < 2)
+				if (ni.members[i]:hp() <= values["Lay on HandsThreshold"] or estimateTTD("player") < 2.5)
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
 					and ni.spell.available("Lay on Hands") 
@@ -241,7 +240,7 @@ local abilities = {
     -- Casts Divine Protection on the player if their health is below the threshold.
 	["Divine Protection"] = function()
 		if enables["Divine Protection"] 
-			and (ni.unit.hp("player") <= values["Divine ProtectionThreshold"] or estimateTTD("player") < 2)
+			and (ni.unit.hp("player") <= values["Divine ProtectionThreshold"] or estimateTTD("player") < 2.5)
 			and not ni.unit.debuff("player", "Forbearance") 
 			and ucheck() 
 			and ni.spell.available("Divine Protection") 
@@ -258,11 +257,11 @@ local abilities = {
 	end,
 
 	-- Hand of Protection
-	-- Casts Hand of Protection on any group member if their health is below the threshold or TTD is less than 2 seconds.
+	-- Casts Hand of Protection on any group member if their health is below the threshold or TTD is less than 2.5 seconds.
 	["Hand of Protection"] = function()
 		if enables["Hand of Protection"] then
 			for i = 1, #ni.members.sort() do
-				if (ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] or estimateTTD("player") < 2)
+				if (ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] or estimateTTD("player") < 2.5)
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
 					and ni.spell.available("Hand of Protection")
@@ -292,8 +291,9 @@ local abilities = {
 					and ni.spell.available("Divine Sacrifice")
 					and member:combat()
 					and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Divine Protection"))
+					and UnitAffectingCombat("player") 
 				then
-					ni.spell.cast("Divine Sacrifice") -- Cast on self, not on the member
+					ni.spell.cast("Divine Sacrifice")
 					print("Divine Sacrifice cast to protect ", member.name)
 					return true
 				end
@@ -393,22 +393,30 @@ local abilities = {
     end,
 
 	-- Divine Favor
-	-- Casts Divine Favor if player's health is below the threshold.
+	-- Casts Divine Favor if player's health is below the threshold and Cast Holy Shock to target.
 	["Divine Favor"] = function()
 		if enables["Divine Favor"] then
 			if ni.unit.hp("player") <= values["Divine FavorThreshold"] 
 				and ucheck() 
 				and ni.spell.available("Divine Favor") 
+				and ni.spell.available("Holy Shock")
 				and UnitAffectingCombat("player") 
 			then
 				ni.spell.cast("Divine Favor", "player")
 				print("Divine Favor")
-				return true
+				for i = 1, #ni.members.sort() do
+					if ni.members[i]:valid("Holy Shock", false, true) 
+					then
+						ni.spell.cast("Holy Shock", ni.members[i].guid)
+						print("Holy Shock")
+						return true
+					end
+				end
 			end
 		end
 		return false
 	end,
-	
+
     -- Divine Illumination
     -- Casts Divine Illumination if the player's mana is below the threshold.
     ["Divine Illumination"] = function()
@@ -448,8 +456,8 @@ local abilities = {
     end,
 	
 	-- Hand of Freedom
-	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
-	["Hand of Freedom"] = function()
+    -- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
+    ["Hand of Freedom"] = function()
         if enables["Hand of Freedom"] then
             for i = 1, #ni.members.sort() do
                 if ni.members[i]:combat() 
@@ -459,8 +467,8 @@ local abilities = {
                     and ni.members[i]:valid("Hand of Freedom", false, true) 
                 then
                     -- Check each debuff in the HoFDebuff list
-                    for debuffID, debuffName in pairs(HoFDebuff) do
-                        if ni.members[i]:debuff(debuffID) or ni.members[i]:debufftype("Rooted") or ni.members[i]:debufftype("Ensnared") then
+                    for _, debuffName in ipairs(HoFDebuff) do
+                        if ni.members[i]:debuff(debuffName) or ni.members[i]:debufftype("Rooted") or ni.members[i]:debufftype("Ensnared") then
                             ni.spell.cast("Hand of Freedom", ni.members[i].guid)
                             print("Hand of Freedom")
                             return true
@@ -557,7 +565,7 @@ local abilities = {
 	-- If we do not have Blessing of Kings buff, buff self
 	-- If we have Greater of Blessing of Kings, do not override buff by casting Blessing of Kings
 	["Blessing of Kings"] = function()
-		if enables["BoK"] then
+		if enables["Blessing of Kings"] then
 			local hasGreaterBlessing = ni.unit.buff("player", "Greater Blessing of Kings")
 			local hasBlessing = ni.unit.buff("player", "Blessing of Kings")
 			
