@@ -13,14 +13,11 @@ Download the latest Release version of the NI Program from the provided GitHub l
 
 ### Installation
 
-1. Download Ni Program from the link above, Extract.
+1. Download Ni Program from the link above, Extract to anywhere.
 2. Download the `.lua` script file.
-3. Copy and paste .lua to Ni `Folder\Addons\Rotations\Paladin` folder.
-4. Run Ni Program. uncheck everything except WoTLK, click launch.
+3. Put .lua into `Ni Folder\Addons\Rotations\Paladin` folder.
+4. Run Ni Program. uncheck everything except WoTLK, select wow.exe, click launch.
 5. Login into your Holy Paladin Character.
-6. In-game, Press F1 to load script.
-7. Top menu is auto-hidden, edit variables to your preference.
-8. Click minimap icon for settings.
 
 ### Usage
 
