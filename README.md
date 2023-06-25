@@ -1,6 +1,6 @@
 # Holy Paladin PVP Rotation Profile for NI Program
 
-This project is a World of Warcraft bot script specifically designed for healing as a Paladin. The bot is built to automate the task of healing during various group events such as PVP and Battlegrounds. 
+This project is a World of Warcraft rotation specifically designed for healing as a Paladin. The bot is built to automate the task of healing during various group events such as PVP and Battlegrounds. 
 
 The script is tailored for the World of Warcraft Wrath of the Lich King, patch 3.3.5a. It has been tested on the Warmane server, Blackrock realm.
 
