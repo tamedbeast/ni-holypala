@@ -20,15 +20,20 @@ This bot script is designed to be used with the [NI Program](https://github.com/
 
 ### Installation
 
-1. Download the `.lua` script file.
-2. Open the NI Program and load the script.
-3. Customize the bot settings as per your needs.
+1. Download Ni Program from the link above, Extract.
+2. Download the `.lua` script file.
+3. Copy and paste .lua to Addons\Paladin folder.
+4. Run Ni Program. uncheck everything except WoTLK, click launch.
+5. Login into your Holy Paladin Character.
+6. In-game, Press F1 to load script.
+7. Top menu is auto-hidden, edit variables to your preference.
+8. Click minimap icon for settings.
 
 ### Usage
 
-1. Once the script is loaded, start the NI Program.
-2. Monitor the bot activity and intervene manually if necessary.
-3. You can pause or stop the NI Program at any time.
+1.  In-game, Press F1 to load script.
+2.  Top menu is auto-hidden, edit variables to your preference.
+3.  Click minimap icon for settings.
 
 ## Settings
 
