@@ -444,7 +444,6 @@ local abilities = {
         if enables["Holy Shock"] then
             for i = 1, #ni.members.sort() do
                 if ni.members[i]:hp() <= values["Holy ShockThreshold"]
-                    and ni.members[i]:range(40)
                     and ucheck() 
                     and ni.spell.available("Holy Shock") 
                     and ni.members[i]:valid("Holy Shock", false, true) 
@@ -473,26 +472,6 @@ local abilities = {
                 then
                     ni.spell.cast("Flash of Light", ni.members[i].guid)
                     print("Flash of Light")
-                    return true
-                end
-            end
-        end
-        return false
-    end,
-
-    --Holy Light
-    -- Casts Holy Light on any group member if their health is below the threshold and the player has line of sight to them.
-    ["Holy Light"] = function()
-        if enables["Holy Light"] then
-            for i = 1, #ni.members.sort() do
-                if ni.members[i]:hp() <= values["Holy LightThreshold"]
-                    and ni.members[i]:range(40)
-                    and ucheck() 
-                    and ni.spell.available("Holy Light") 
-                    and ni.members[i]:valid("Holy Light", false, true) 
-                then
-                    ni.spell.cast("Holy Light", ni.members[i].guid)
-                    print("Holy Light")
                     return true
                 end
             end
