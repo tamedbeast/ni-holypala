@@ -110,7 +110,7 @@ end
 local items = {
 	settingsfile = "HPal.json"
     callback = GUICallback,
-    { type = "title", text = "HPal" },
+    { type = "title", text = "Holy Paladin PVP Profile" },
 }
 
 for _, ability in ipairs(queue) do
