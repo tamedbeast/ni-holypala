@@ -14,6 +14,7 @@ local queue = {
     "Hand of Freedom",
     "Hammer of Wrath",
     "Hammer of Justice",
+	"Bauble of True Blood",
     "Holy Shock",
     "Flash of Light",
     "Cleanse",
@@ -36,6 +37,7 @@ local values = {
     ["Divine IlluminationThreshold"] = 65,
     --["Hand of FreedomThreshold"] = 0,
     ["Hand of FreedomThreshold"] = 65,
+	["Bauble of True BloodThreshold"] = 50,
     ["Holy ShockThreshold"] = 88,
     ["Flash of LightThreshold"] = 88,
     --["CleanseThreshold"] = 0,
@@ -329,21 +331,27 @@ local abilities = {
 
 
     -- Use Healthstone
-    -- Uses a Healthstone if the player's health is below 20% and passes the ucheck conditions.
-    ["Use Healthstone"] = function()
-        if enables["Use Healthstone"] 
+	-- Uses a Healthstone if the player's health is below 20% and passes the ucheck conditions.
+	["Use Healthstone"] = function()
+		local itemId1 = 36892 -- Item ID for Fel Healthstone
+		local itemId2 = 36894 -- Another Item ID for Fel Healthstone
+		if enables["Use Healthstone"] 
 			and ni.unit.hp("player") <= values["Use HealthstoneThreshold"]
-            and ni.player.hasitem("Fel Healthstone") 
-            and ucheck() 
-            and UnitAffectingCombat("player") 
-        then
-            ni.player.useitem(GetItemIdByName("Fel Healthstone"))
-            print("Healthstone")
-            return true
-        end
-        return false
-    end,
-	
+			and (ni.player.hasitem(itemId1) or ni.player.hasitem(itemId2)) 
+			and ucheck() 
+			and UnitAffectingCombat("player") 
+		then
+			if ni.player.hasitem(itemId1) then
+				ni.player.useitem(itemId1)
+			else
+				ni.player.useitem(itemId2)
+			end
+			print("Healthstone")
+			return true
+		end
+		return false
+	end,
+
     -- Sacred Shield
     -- Casts Sacred Shield on the player if they do not already have the Sacred Shield buff.
     ["Sacred Shield"] = function()
@@ -501,6 +509,31 @@ local abilities = {
         return false
     end,
 
+	-- Bauble of True Blood (Trinket)
+	-- Uses the Bauble of True Blood trinket on any group member if their health is below the threshold, the player has line of sight to them, and both the player and the target are in combat.
+	["Bauble of True Blood"] = function()
+		local itemId = 50354 -- Item ID for Bauble of True Blood
+		if enables["Bauble of True Blood"] 
+			and ni.player.hasitemequipped(itemId) 
+		then
+			for i = 1, #ni.members.sort() do
+				if ni.members[i]:hp() <= values["Bauble of True BloodThreshold"]
+					and ucheck() 
+					and not ni.player.itemcd(itemId) > 0
+					and ni.members[i]:valid(itemId, false, true)
+					and ni.members[i]:combat()
+					and UnitAffectingCombat("player")
+				then
+					ni.player.target(ni.members[i].guid)
+					ni.player.useinventoryitem(itemId)
+					print("Bauble of True Blood")
+					return true
+				end
+			end
+		end
+		return false
+	end,
+
     -- Holy Shock
     -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
     ["Holy Shock"] = function()
@@ -569,7 +602,11 @@ local abilities = {
 			local hasGreaterBlessing = ni.unit.buff("player", "Greater Blessing of Kings")
 			local hasBlessing = ni.unit.buff("player", "Blessing of Kings")
 			
-			if not hasBlessing and not hasGreaterBlessing and ucheck("player", "Blessing of Kings") and ni.spell.available("Blessing of Kings") then
+			if not hasBlessing 
+				and not hasGreaterBlessing 
+				and ucheck("player", "Blessing of Kings") 
+				and ni.spell.available("Blessing of Kings") 
+			then
 				ni.spell.cast("Blessing of Kings", "player")
 				print("Blessing of Kings")
 				return true
