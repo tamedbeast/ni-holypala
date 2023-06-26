@@ -108,9 +108,11 @@ local function GUICallback(key, item_type, value)
 end
 
 local items = {
-	settingsfile = "HPal.json"
+	settingsfile = "HPal.json",
     callback = GUICallback,
-    { type = "title", text = "Holy Paladin PVP Profile" },
+	{ type = "separator" },
+    { type = "title", text = "|cffFFFF00Holy Paladin|r PVP Profile" },
+	{ type = "separator" },
 }
 
 for _, ability in ipairs(queue) do
