@@ -47,6 +47,31 @@ local values = {
 	--["Blessing of Kings"] = 0,
 }
 
+local enables = {
+	["Sacred Shield"] = true,
+	["Divine Shield"] = true,
+	["Lay on Hands"] = true,
+	["Divine Protection"] = true,
+	["Hand of Protection"] = true,
+	["Divine Sacrifice"] = true,
+	["Hand of Sacrifice"] = true,
+	["Use Healthstone"] = true,
+	["Sacred Shield"] = true,
+	["Beacon of Light"] = true,
+	["Aura Mastery"] = true,
+	["Divine Favor"] = true,
+	["Divine Illumination"] = true,
+	["Hand of Freedom"] = true,
+	["Hammer of Wrath"] = true,
+	["Hammer of Justice"] = true,
+	["Bauble of True Blood"] = true,
+	["Holy Shock"] = true,
+	["Flash of Light"] = true,
+	["Cleanse"] = true,
+	--["Greater Blessing of Kings"] = true,
+	["Blessing of Kings"] = true,
+}
+
 local HoFDebuff = {
 	"Earthgrab Totem",
 	"Enhance Nova",
@@ -73,45 +98,30 @@ local HoFDebuff = {
 	"Chains of Ice"
 }
 
--- Local Containers
-local enables = {}
-
 local function GUICallback(key, item_type, value)
-    if item_type == "enabled" and enables[key] ~= nil then
-        enables[key] = value
-        if not value then
-            -- Disable the spell if the checkbox is unchecked
-            abilities[key] = nil
-        end
-    elseif item_type == "value" and values[key] ~= nil then
+    if item_type == "enabled" then
+        local ability = key:gsub("Threshold", "")
+        enables[ability] = value
+    elseif item_type == "value" then
         values[key] = value
     end
 end
 
-
-
 local items = {
+	settingsfile = "HPal.json"
     callback = GUICallback,
-    { type = "title", text = "Holy Paladin PvP Profile" },
-    { type = "separator" },
+    { type = "title", text = "HPal" },
 }
-for _, ability in ipairs(queue) do
-    enables[ability] = true
-end
+
 for _, ability in ipairs(queue) do
     table.insert(items, {
         type = "entry",
         text = ability,
+        enabled = enables[ability],  -- Use the ability name as the key
         value = values[ability.."Threshold"],
-        min = 0,
-        max = 100,
-        step = 1,
-        key = ability.."Threshold",
-        enabled = enables[ability],
-        enabledkey = ability
+        key = ability.."Threshold"
     })
 end
-
 
 -- Function to get item ID by name
 local function GetItemIdByName(itemName)
@@ -169,6 +179,13 @@ local abilities = {
 	-- Casts Lay on Hands on any group member if their health is below the threshold.    
 	["Lay on Hands"] = function()
 		if enables["Lay on Hands"] then
+			-- Check if the player is in an arena
+			local inArena = select(2, IsInInstance()) == "arena"
+			if inArena then
+				-- If in an arena, do not use Lay on Hands
+				return false
+			end
+
 			for i = 1, #ni.members.sort() do
 				if ni.members[i]:hp() <= values["Lay on HandsThreshold"]
 					and not ni.members[i]:debuff("Forbearance") 
@@ -188,7 +205,6 @@ local abilities = {
 		end
 		return false
 	end,
-
 
     -- Divine Protection
     -- Casts Divine Protection on the player if their health is below the threshold.
@@ -255,7 +271,6 @@ local abilities = {
 		end
 		return false
 	end,
-
 	
 	-- Hand of Sacrifice
 	-- Casts Hand of Sacrifice on any group member if their health is below the threshold, the player is in combat, and they pass the ucheck conditions.
@@ -285,19 +300,15 @@ local abilities = {
     -- Use Healthstone
 	-- Uses a Healthstone if the player's health is below 20% and passes the ucheck conditions.
 	["Use Healthstone"] = function()
-		local itemId1 = 36892 -- Item ID for Fel Healthstone
-		local itemId2 = 36894 -- Another Item ID for Fel Healthstone
+		local itemName = "Fel Healthstone"
+		local itemId = GetItemIdByName(itemName)
 		if enables["Use Healthstone"] 
 			and ni.unit.hp("player") <= values["Use HealthstoneThreshold"]
-			and (ni.player.hasitem(itemId1) or ni.player.hasitem(itemId2)) 
+			and ni.player.hasitem(itemId)
 			and ucheck() 
 			and UnitAffectingCombat("player")
 		then
-			if ni.player.hasitem(itemId1) then
-				ni.player.useitem(itemId1)
-			else
-				ni.player.useitem(itemId2)
-			end
+			ni.player.useitem(itemId)
 			print("Healthstone")
 			return true
 		end
@@ -307,7 +318,7 @@ local abilities = {
     -- Sacred Shield
     -- Casts Sacred Shield on the player if they do not already have the Sacred Shield buff.
     ["Sacred Shield"] = function()
-        if enables["Sacred Shield"] 
+        if enables["Sacred Shield"]
 			and not ni.unit.buff("player", "Sacred Shield") 
             and ucheck()
             and ni.spell.available("Sacred Shield") 
@@ -414,7 +425,7 @@ local abilities = {
         end
         return false
     end,
-	
+
 	-- Hand of Freedom
     -- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
     ["Hand of Freedom"] = function()
@@ -464,8 +475,11 @@ local abilities = {
 	-- Bauble of True Blood (Trinket)
 	-- Uses the Bauble of True Blood trinket on any group member if their health is below the threshold, the player has line of sight to them, both the player and the target are in combat, and the target is within range.
 	["Bauble of True Blood"] = function()
-		local itemId = 50354 -- Item ID for Bauble of True Blood
-		if enables["Bauble of True Blood"] and enables["Bauble of True Blood"].value and ni.player.hasitemequipped(itemId) then
+		local itemName = "Bauble of True Blood"
+		local itemId = GetItemIdByName(itemName)
+		if enables["Bauble of True Blood"] 
+			and ni.player.hasitemequipped(itemId) 
+		then
 			local membersInRange = ni.members.inrange("player", 40)
 			for i = 1, #membersInRange do
 				local member = membersInRange[i]
@@ -483,8 +497,6 @@ local abilities = {
 		end
 		return false
 	end,
-
-
 
     -- Holy Shock
     -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
@@ -566,7 +578,6 @@ local abilities = {
 		end
 		return false
 	end,
-
 }
 
 local function OnLoad()
