@@ -79,10 +79,15 @@ local enables = {}
 local function GUICallback(key, item_type, value)
     if item_type == "enabled" and enables[key] ~= nil then
         enables[key] = value
+        if not value then
+            -- Disable the spell if the checkbox is unchecked
+            abilities[key] = nil
+        end
     elseif item_type == "value" and values[key] ~= nil then
         values[key] = value
     end
 end
+
 
 
 local items = {
@@ -189,7 +194,7 @@ local abilities = {
     -- Casts Divine Protection on the player if their health is below the threshold.
 	["Divine Protection"] = function()
 		if enables["Divine Protection"] 
-			and ni.unit.hp("player") <= values["Divine ProtectionThreshold"] or estimateTTD("player")
+			and ni.unit.hp("player") <= values["Divine ProtectionThreshold"]
 			and not ni.unit.debuff("player", "Forbearance") 
 			and ucheck() 
 			and ni.spell.available("Divine Protection") 
@@ -210,7 +215,7 @@ local abilities = {
 	["Hand of Protection"] = function()
 		if enables["Hand of Protection"] then
 			for i = 1, #ni.members.sort() do
-				if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] or estimateTTD("player")
+				if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"]
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
 					and ni.spell.available("Hand of Protection")
@@ -457,21 +462,20 @@ local abilities = {
     end,
 
 	-- Bauble of True Blood (Trinket)
-	-- Uses the Bauble of True Blood trinket on any group member if their health is below the threshold, the player has line of sight to them, and both the player and the target are in combat.
+	-- Uses the Bauble of True Blood trinket on any group member if their health is below the threshold, the player has line of sight to them, both the player and the target are in combat, and the target is within range.
 	["Bauble of True Blood"] = function()
 		local itemId = 50354 -- Item ID for Bauble of True Blood
-		if enables["Bauble of True Blood"] 
-			and ni.player.hasitemequipped(itemId)
-		then
-			for i = 1, #ni.members.sort() do
-				if ni.members[i]:hp() <= values["Bauble of True BloodThreshold"]
-					and ucheck() 
+		if enables["Bauble of True Blood"] and enables["Bauble of True Blood"].value and ni.player.hasitemequipped(itemId) then
+			local membersInRange = ni.members.inrange("player", 40)
+			for i = 1, #membersInRange do
+				local member = membersInRange[i]
+				if member:hp() <= values["Bauble of True BloodThreshold"]
+					and ucheck()
 					and ni.player.itemcd(itemId) == 0
-					and ni.members[i]:combat()
-					and ni.members[i]:los()
-					and UnitAffectingCombat("player")
+					and member:combat()
+					and member:los()
 				then
-					ni.player.useitem(itemId, ni.members[i].guid)
+					ni.player.useitem(itemId, member.guid)
 					print("Bauble of True Blood")
 					return true
 				end
@@ -479,6 +483,8 @@ local abilities = {
 		end
 		return false
 	end,
+
+
 
     -- Holy Shock
     -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
