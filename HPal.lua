@@ -128,6 +128,7 @@ local function ucheck()
         not UnitIsDeadOrGhost("player") and
         not UnitChannelInfo("player") and
         not UnitCastingInfo("player") and
+		not ni.player.islooting() and
         not ni.unit.isstunned("player") and
         not ni.unit.issilenced("player") and
         not ni.unit.ispacified("player") and
@@ -139,65 +140,14 @@ local function ucheck()
 		not ni.unit.debuff("player", "Fear") and
 		not ni.unit.debuff("player", "Blind")
 end
------------------------------------------------------------
-local unitHealth = {}
-local unitTime = {}
-
-local function trackHealth(unit)
-    local currentHealth = UnitHealth(unit)
-    local currentTime = GetTime()
-
-    if unitHealth[unit] == nil then
-        unitHealth[unit] = {}
-        unitTime[unit] = {}
-    end
-
-    table.insert(unitHealth[unit], currentHealth)
-    table.insert(unitTime[unit], currentTime)
-
-    -- Keep only the last 5 seconds of data
-    while unitTime[unit][1] < currentTime - 5 do
-        table.remove(unitHealth[unit], 1)
-        table.remove(unitTime[unit], 1)
-    end
-end
-
-local function estimateTTD(unit)
-    local healthData = unitHealth[unit]
-
-    if healthData == nil or #healthData < 2 then
-        -- Not enough data to make a prediction
-        return math.huge
-    end
-
-    local numPoints = #healthData
-    local firstHealth = healthData[1]
-    local lastHealth = healthData[numPoints]
-    local firstTime = unitTime[unit][1]
-    local lastTime = unitTime[unit][numPoints]
-
-    local healthChange = firstHealth - lastHealth
-    local timeChange = lastTime - firstTime
-
-    if healthChange <= 0 then
-        -- The unit is not losing health
-        return math.huge
-    end
-
-    local healthLossRate = healthChange / timeChange
-    local currentHealth = UnitHealth(unit)
-
-    return currentHealth / healthLossRate
-end
------------------------------------------------------------
 
 -- Ability functions
 local abilities = {
 	-- Divine Shield
-	-- Casts Divine Shield on the player if their health is below the threshold or if TTD is less than 2.5 seconds.
+	-- Casts Divine Shield on the player if their health is below the threshold.
 	["Divine Shield"] = function()
 		if enables["Divine Shield"] 
-			and (ni.unit.hp("player") <= values["Divine ShieldThreshold"] or estimateTTD("player") < 2.5) 
+			and ni.unit.hp("player") <= values["Divine ShieldThreshold"]
 			and not ni.unit.debuff("player", "Forbearance") 
 			and ucheck() 
 			and ni.spell.available("Divine Shield") 
@@ -218,7 +168,7 @@ local abilities = {
 	["Lay on Hands"] = function()
 		if enables["Lay on Hands"] then
 			for i = 1, #ni.members.sort() do
-				if (ni.members[i]:hp() <= values["Lay on HandsThreshold"] or estimateTTD("player") < 2.5)
+				if ni.members[i]:hp() <= values["Lay on HandsThreshold"]
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
 					and ni.spell.available("Lay on Hands") 
@@ -242,7 +192,7 @@ local abilities = {
     -- Casts Divine Protection on the player if their health is below the threshold.
 	["Divine Protection"] = function()
 		if enables["Divine Protection"] 
-			and (ni.unit.hp("player") <= values["Divine ProtectionThreshold"] or estimateTTD("player") < 2.5)
+			and ni.unit.hp("player") <= values["Divine ProtectionThreshold"] or estimateTTD("player")
 			and not ni.unit.debuff("player", "Forbearance") 
 			and ucheck() 
 			and ni.spell.available("Divine Protection") 
@@ -259,11 +209,11 @@ local abilities = {
 	end,
 
 	-- Hand of Protection
-	-- Casts Hand of Protection on any group member if their health is below the threshold or TTD is less than 2.5 seconds.
+	-- Casts Hand of Protection on any group member if their health is below the threshold.
 	["Hand of Protection"] = function()
 		if enables["Hand of Protection"] then
 			for i = 1, #ni.members.sort() do
-				if (ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] or estimateTTD("player") < 2.5)
+				if ni.members[i]:hp() <= values["Hand of ProtectionThreshold"] or estimateTTD("player")
 					and not ni.members[i]:debuff("Forbearance") 
 					and ucheck() 
 					and ni.spell.available("Hand of Protection")
