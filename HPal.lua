@@ -339,7 +339,7 @@ local abilities = {
 			and ni.unit.hp("player") <= values["Use HealthstoneThreshold"]
 			and (ni.player.hasitem(itemId1) or ni.player.hasitem(itemId2)) 
 			and ucheck() 
-			and UnitAffectingCombat("player") 
+			and UnitAffectingCombat("player")
 		then
 			if ni.player.hasitem(itemId1) then
 				ni.player.useitem(itemId1)
@@ -514,18 +514,17 @@ local abilities = {
 	["Bauble of True Blood"] = function()
 		local itemId = 50354 -- Item ID for Bauble of True Blood
 		if enables["Bauble of True Blood"] 
-			and ni.player.hasitemequipped(itemId) 
+			and ni.player.hasitemequipped(itemId)
 		then
 			for i = 1, #ni.members.sort() do
 				if ni.members[i]:hp() <= values["Bauble of True BloodThreshold"]
 					and ucheck() 
-					and not ni.player.itemcd(itemId) > 0
-					and ni.members[i]:valid(itemId, false, true)
+					and ni.player.itemcd(itemId) == 0
 					and ni.members[i]:combat()
+					and ni.members[i]:los()
 					and UnitAffectingCombat("player")
 				then
-					ni.player.target(ni.members[i].guid)
-					ni.player.useinventoryitem(itemId)
+					ni.player.useitem(itemId, ni.members[i].guid)
 					print("Bauble of True Blood")
 					return true
 				end
