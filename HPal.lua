@@ -73,30 +73,64 @@ local enables = {
 }
 
 local HoFDebuff = {
-	"Earthgrab Totem",
-	"Enhance Nova",
-	"Frost Nova",
-	"Frostbite",
-	"Freeze",
-	"Nature's Grasp",
-	"Entangling Roots",
-	"Hamstring",
-	"Desecration",
-	"Frost Trap",
-	"Frostbolt",
-	"Cone of Cold",
-	"Frostfire Bolt",
-	"Mirror Image",
-	"Chilled",
-	"Slow",
-	"Frost Shock",
-	"Earthbind Totem",
-	"Shadowflame",
-	"Conflagration",
-	"Feral Disease",
-	"Crippling Poison",
-	"Chains of Ice"
+	-- root ensnared, Mod Decrease Speed, 
+	["Chains of Ice"] = 45524,
+	["Hamstring"] = 1715,
+	["Crippling Poison"] = 3408,
+	["Frostbolt"] = 59638,
+	["Seal of Justice"] = 20164,
+	["Cleave"] = 25809,
+	["Slow"] = 31589,
+	["Earthgrab Totem"] = 51585,
+	["Ice Barrier"] = 50040,
+	["Chilblains"] = 50041,
+	["Blade Twisting"] = 31124,
+	["Frost Nova"] = 122,
+	["Frostfire Bolt"] = 44614,
+	["Dazed"] = 1604,
+	["Entangling Roots"] = 339,
+	["Feral Charge - Cat"] = 45334,
+	["Infected Wounds"] = 58179,
+	["Typhoon"] = 61391,
+	["Counterattack"] = 19306,
+	["Entrapment"] = 19185,
+	["Concussive Barrage"] = 35101,
+	["Concussive Shot"] = 5116,
+	["Wing Clip"] = 2974,
+	["Glyph of Frost Nova"] = 61394,
+	["Frostfire Orb"] = 54644,
+	["Black Arrow"] = 50245,
+	["T.N.T."] = 50271,
+	["Venom Web Spray"] = 54706,
+	["Web"] = 4167,
+	["Freeze"] = 33395,
+	["Shattered Barrier"] = 55080,
+	["Blast Wave"] = 11113,
+	["Chilled"] = 6136,
+	["Cone of Cold"] = 120,
+	["Frostbolt"] = 116,
+	["Frostfire Bolt"] = 44614,
+	["Slow"] = 31589,
+	["Seal of Command"] = 20170,
+	["Blade Flurry"] = 31125,
+	["Crippling Poison II"] = 3409,
+	["Deadly Throw"] = 26679,
+	["Earth and Moon"] = 64695,
+	["Freeze"] = 63685,
+	["Frost Shock"] = 8056,
+	["Frostbrand Attack"] = 8034,
+	["Aftermath"] = 18118,
+	["Curse of Exhaustion"] = 18223,
+	["Binding Heal"] = 63311,
+	["Healing Touch"] = 23694,
+	--["Hamstring"] = 1715,
+	["Piercing Howl"] = 12323,
+	["Frost Grenade"] = 39965,
+	["Frost Presence"] = 55536,
+	["Ice Barrier"] = 13099,
+	["Dazed"] = 29703
 }
+
 
 local function GUICallback(key, item_type, value)
     if item_type == "enabled" then
@@ -429,29 +463,24 @@ local abilities = {
     end,
 
 	-- Hand of Freedom
-    -- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
-    ["Hand of Freedom"] = function()
-        if enables["Hand of Freedom"] then
-            for i = 1, #ni.members.sort() do
-                if ni.members[i]:combat() 
-                    and ni.healing.candispel(ni.members[i].guid) 
-                    and ucheck() 
-                    and ni.spell.available("Hand of Freedom") 
-                    and ni.members[i]:valid("Hand of Freedom", false, true) 
-                then
-                    -- Check each debuff in the HoFDebuff list
-                    for _, debuffName in ipairs(HoFDebuff) do
-                        if ni.members[i]:debuff(debuffName) or ni.members[i]:debufftype("Rooted") or ni.members[i]:debufftype("Ensnared") then
-                            ni.spell.cast("Hand of Freedom", ni.members[i].guid)
-                            print("Hand of Freedom")
-                            return true
-                        end
-                    end
-                end
-            end
-        end
-        return false
-    end,
+	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
+	["Hand of Freedom"] = function()
+		if enables["Hand of Freedom"] then
+			for i = 1, #ni.members.sort() do
+				if ni.members[i]:combat() 
+					and ni.healing.candispel(ni.members[i].guid) 
+					and ucheck() 
+					and ni.spell.available("Hand of Freedom") 
+					and ni.members[i]:valid("Hand of Freedom", false, true) 
+				then
+					ni.spell.cast("Hand of Freedom", ni.members[i].guid)
+					print("Hand of Freedom")
+					return true
+				end
+			end
+		end
+		return false
+	end,
 
     -- Hammer of Justice
     -- Casts on an enemy target within 10 yards if they are casting or channeling, and the spell is available.
@@ -501,45 +530,46 @@ local abilities = {
 	end,
 
     -- Holy Shock
-    -- Casts Holy Shock on any group member if their health is below the threshold and the player has line of sight to them.
-    ["Holy Shock"] = function()
-        if enables["Holy Shock"] then
-            for i = 1, #ni.members.sort() do
-                if ni.members[i]:hp() <= values["Holy ShockThreshold"]
-                    and ucheck() 
-                    and ni.spell.available("Holy Shock") 
-                    and ni.members[i]:valid("Holy Shock", false, true) 
-                then
-                    ni.spell.cast("Holy Shock", ni.members[i].guid)
-                    print("Holy Shock")
-                    return true
-                end
-            end
-        end
-        return false
-    end,
+	-- Casts Holy Shock on any group member, including yourself, if their health is below the threshold and the player has line of sight to them.
+	["Holy Shock"] = function()
+		if enables["Holy Shock"] then
+			for i = 1, #ni.members.sort() do
+				if (ni.members[i]:hp() <= values["Holy ShockThreshold"] or ni.unit.hp("player") <= values["Holy ShockThreshold"])
+					and ucheck()
+					and ni.spell.available("Holy Shock")
+					and ni.members[i]:valid("Holy Shock", false, true)
+				then
+					ni.spell.cast("Holy Shock", ni.members[i].guid)
+					print("Holy Shock")
+					return true
+				end
+			end
+		end
+		return false
+	end,
 
     -- Flash of Light
-    -- Casts Flash of Light on any group member if the player is not moving for 0.1 seconds or has the Infusion of Light buff, and the group member's health is below the threshold.
-    ["Flash of Light"] = function()
-        if enables["Flash of Light"] then
-            local isMoving = ni.player.movingfor(0.1)
-            local hasInfusionOfLight = ni.unit.buff("player", "Infusion of Light")
-            for i = 1, #ni.members.sort() do
-                if (not isMoving or hasInfusionOfLight) 
-                    and ni.members[i]:hp() <= values["Flash of LightThreshold"] 
-                    and ucheck() 
-                    and ni.spell.available("Flash of Light") 
-                    and ni.members[i]:valid("Flash of Light", false, true) 
-                then
-                    ni.spell.cast("Flash of Light", ni.members[i].guid)
-                    print("Flash of Light")
-                    return true
-                end
-            end
-        end
-        return false
-    end,
+	-- Casts Flash of Light on any group member, including yourself, if the player is not moving for 0.1 seconds or has the Infusion of Light buff, and the group member's health is below the threshold.
+	["Flash of Light"] = function()
+		if enables["Flash of Light"] then
+			local isMoving = ni.player.movingfor(0.1)
+			local hasInfusionOfLight = ni.unit.buff("player", "Infusion of Light")
+			for i = 1, #ni.members.sort() do
+				if (not isMoving or hasInfusionOfLight)
+					and (ni.members[i]:hp() <= values["Flash of LightThreshold"] or ni.unit.hp("player") <= values["Flash of LightThreshold"])
+					and ucheck()
+					and ni.spell.available("Flash of Light")
+					and ni.members[i]:valid("Flash of Light", false, true)
+				then
+					ni.spell.cast("Flash of Light", ni.members[i].guid)
+					print("Flash of Light")
+					return true
+				end
+			end
+		end
+		return false
+	end,
+
 
     -- Cleanse
     -- Casts Cleanse on any group member if they have a debuff that can be cleansed and the player has line of sight to them.
