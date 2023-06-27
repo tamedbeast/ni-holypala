@@ -18,7 +18,6 @@ local queue = {
 	"Holy Shock",
 	"Flash of Light",
 	"Cleanse",
-	"Greater Blessing of Kings",
 	"Blessing of Kings",
 }
 
@@ -43,7 +42,6 @@ local values = {
 	--["CleanseThreshold"] = 0,
 	--["Sacred Shield"] = 0,
 	--["Beacon of Light"] = 0,
-	--["Greater Blessing of Kings"] = 0,
 	--["Blessing of Kings"] = 0,
 }
 
@@ -68,7 +66,6 @@ local enables = {
 	["Holy Shock"] = true,
 	["Flash of Light"] = true,
 	["Cleanse"] = true,
-	--["Greater Blessing of Kings"] = true,
 	["Blessing of Kings"] = true,
 }
 
@@ -192,7 +189,7 @@ end
 -- Ability functions
 local abilities = {
 	-- Divine Shield
-	-- Casts Divine Shield on the player if their health is below the threshold.
+	-- Casts Divine Shield on the player if their health is below the threshold and they are not under the Forbearance debuff.
 	["Divine Shield"] = function()
 		if enables["Divine Shield"] 
 			and ni.unit.hp("player") <= values["Divine ShieldThreshold"]
@@ -212,7 +209,7 @@ local abilities = {
 	end,
 	
 	-- Lay on Hands
-	-- Casts Lay on Hands on any group member if their health is below the threshold.    
+	-- Casts Lay on Hands on any group member if their health is below the threshold and they are not under the Forbearance debuff.
 	["Lay on Hands"] = function()
 		if enables["Lay on Hands"] then
 			local inArena = select(2, IsInInstance()) == "arena"
@@ -240,7 +237,7 @@ local abilities = {
 	end,
 
     -- Divine Protection
-    -- Casts Divine Protection on the player if their health is below the threshold.
+    -- Casts Divine Protection on the player if their health is below the threshold and they are not under the Forbearance debuff.
 	["Divine Protection"] = function()
 		if enables["Divine Protection"] 
 			and ni.unit.hp("player") <= values["Divine ProtectionThreshold"]
@@ -260,7 +257,7 @@ local abilities = {
 	end,
 
 	-- Hand of Protection
-	-- Casts Hand of Protection on any group member if their health is below the threshold.
+	-- Casts Hand of Protection on any group member if their health is below the threshold and they are not under the Forbearance debuff.
 	["Hand of Protection"] = function()
 		if enables["Hand of Protection"] then
 			for i = 1, #ni.members.sort() do
@@ -283,7 +280,7 @@ local abilities = {
 	end,
     
     -- Divine Sacrifice
-    -- Casts Divine Sacrifice if any group member's health is below the threshold.
+    -- Casts Divine Sacrifice to protect any group member if their health is below the threshold and the player is not under Divine Shield or Divine Protection.
 	["Divine Sacrifice"] = function()
 		if enables["Divine Sacrifice"] then
 			for i = 1, #ni.members.sort() do
@@ -306,7 +303,7 @@ local abilities = {
 	end,
 	
 	-- Hand of Sacrifice
-	-- Casts Hand of Sacrifice on any group member if their health is below the threshold, the player is in combat, and they pass the ucheck conditions.
+	-- Casts Hand of Sacrifice on any group member if their health is below the threshold, they are not under Divine Shield or Hand of Protection, and the player is not under Divine Sacrifice.
 		["Hand of Sacrifice"] = function()
 		if enables["Hand of Sacrifice"] then
 			for i = 1, #ni.members.sort() do
@@ -329,9 +326,8 @@ local abilities = {
 		return false
 	end,
 
-
     -- Use Healthstone
-	-- Uses a Healthstone if the player's health is below 20% and passes the ucheck conditions.
+	-- Uses a Healthstone if the player's health is below the threshold and they have one in their inventory.
 	["Use Healthstone"] = function()
 		local itemName = "Fel Healthstone"
 		local itemId = GetItemIdByName(itemName)
@@ -379,7 +375,7 @@ local abilities = {
     end,
 	
     -- Aura Mastery
-    -- Casts Aura Mastery if the player's health is below the threshold.
+    -- Casts Aura Mastery if the player's health is below the threshold, they have the Concentration Aura buff, and they are not under Divine Shield or Hand of Protection.
     ["Aura Mastery"] = function()
         if enables["Aura Mastery"] 
 			and ni.unit.hp("player") <= values["Aura MasteryThreshold"] 
@@ -397,7 +393,7 @@ local abilities = {
     end,
 
 	-- Divine Favor
-	-- Casts Divine Favor if player's health is below the threshold and Cast Holy Shock to target.
+	-- Casts Divine Favor and then Holy Shock on any group member if their health is below the threshold.
 	["Divine Favor"] = function()
 		if enables["Divine Favor"] then
 			if ni.unit.hp("player") <= values["Divine FavorThreshold"] 
@@ -438,7 +434,7 @@ local abilities = {
     end,
 
     -- Hammer of Wrath
-    -- Casts on an enemy target within 30 yards if their health is below the threshold and the spell is available.
+    -- Casts Hammer of Wrath on an enemy target within range if their health is below the threshold.
     ["Hammer of Wrath"] = function()
         if enables["Hammer of Wrath"] then
             local enemies = ni.unit.enemiesinrange("player", 30)
@@ -460,7 +456,7 @@ local abilities = {
     end,
 
 	-- Hand of Freedom
-	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, Stun, or Slow debuff and the player has line of sight to them.
+	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, Stun, or Slow debuff.
 	["Hand of Freedom"] = function()
 		if enables["Hand of Freedom"] then
 			for i = 1, #ni.members.sort() do
@@ -488,7 +484,7 @@ local abilities = {
 	end,
 
     -- Hammer of Justice
-    -- Casts on an enemy target within 10 yards if they are casting or channeling, and the spell is available.
+    -- Casts Hammer of Justice on an enemy target within range if they are casting or channeling a spell.
     ["Hammer of Justice"] = function()
         if enables["Hammer of Justice"] then
             local enemies = ni.unit.enemiesinrange("player", 10)
@@ -509,7 +505,7 @@ local abilities = {
     end,
 
 	-- Bauble of True Blood (Trinket)
-	-- Uses the Bauble of True Blood trinket on any group member if their health is below the threshold, the player has line of sight to them, both the player and the target are in combat, and the target is within range.
+	-- Uses the Bauble of True Blood trinket on any group member if their health is below the threshold.
 	["Bauble of True Blood"] = function()
 		local itemName = "Bauble of True Blood"
 		local itemId = GetItemIdByName(itemName)
@@ -535,7 +531,7 @@ local abilities = {
 	end,
 
     -- Holy Shock
-	-- Casts Holy Shock on any group member, including yourself, if their health is below the threshold and the player has line of sight to them.
+	-- Casts Holy Shock on any group member if their health is below the threshold.
 	["Holy Shock"] = function()
 		if enables["Holy Shock"] then
 			for i = 1, #ni.members.sort() do
@@ -554,7 +550,7 @@ local abilities = {
 	end,
 
     -- Flash of Light
-	-- Casts Flash of Light on any group member, including yourself, if the player is not moving for 0.1 seconds or has the Infusion of Light buff, and the group member's health is below the threshold.
+	-- Casts Flash of Light on any group member if the player is not moving or has the Infusion of Light buff, and the group member's health is below the threshold.
 	["Flash of Light"] = function()
 		if enables["Flash of Light"] then
 			local isMoving = ni.player.movingfor(0.1)
@@ -577,7 +573,7 @@ local abilities = {
 
 
     -- Cleanse
-    -- Casts Cleanse on any group member if they have a debuff that can be cleansed and the player has line of sight to them.
+	-- Casts Cleanse on any group member if they have a debuff that can be cleansed and the player has line of sight to them.
     ["Cleanse"] = function()
         if enables["Cleanse"] then
             for i = 1, #ni.members.sort() do
@@ -596,8 +592,7 @@ local abilities = {
     end,
 
 	-- Blessing of Kings
-	-- If we do not have Blessing of Kings buff, buff self
-	-- If we have Greater of Blessing of Kings, do not override buff by casting Blessing of Kings
+	-- Casts Blessing of Kings on the player if they do not have the Blessing of Kings buff and are not under the Greater Blessing of Kings buff.
 	["Blessing of Kings"] = function()
 		if enables["Blessing of Kings"] then
 			local hasGreaterBlessing = ni.unit.buff("player", "Greater Blessing of Kings")
