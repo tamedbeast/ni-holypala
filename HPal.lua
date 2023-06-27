@@ -140,6 +140,7 @@ local function GUICallback(key, item_type, value)
     end
 end
 
+
 local items = {
 	settingsfile = "HPal.json",
     callback = GUICallback,
@@ -152,7 +153,7 @@ for _, ability in ipairs(queue) do
     table.insert(items, {
         type = "entry",
         text = ability,
-        enabled = enables[ability],  -- Use the ability name as the key
+        enabled = enables[ability],
         value = values[ability.."Threshold"],
         key = ability.."Threshold"
     })
@@ -464,8 +465,15 @@ local abilities = {
 		if enables["Hand of Freedom"] then
 			for i = 1, #ni.members.sort() do
 				local member = ni.members[i]
+				local hasHoFDebuff = false
+				for debuffName, debuffId in pairs(HoFDebuff) do
+					if member:debuff(debuffId) then
+						hasHoFDebuff = true
+						break
+					end
+				end
 				if member:combat() 
-					and (ni.healing.candispel(member.guid) or member:hasdebuff(HoFDebuff))
+					and (ni.healing.candispel(member.guid) or hasHoFDebuff)
 					and ucheck() 
 					and ni.spell.available("Hand of Freedom") 
 					and member:valid("Hand of Freedom", false, true) 
@@ -579,7 +587,7 @@ local abilities = {
                     and ni.members[i]:valid("Cleanse", false, true) 
                 then
                     ni.spell.cast("Cleanse", ni.members[i].guid)
-                    print("Cleanse")
+                    print("Cleanse", ni.members[i].name)
                     return true
                 end
             end
