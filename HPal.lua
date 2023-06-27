@@ -73,7 +73,7 @@ local enables = {
 }
 
 local HoFDebuff = {
-	-- root ensnared, Mod Decrease Speed, 
+	-- Root, Ensnared, Mod Decrease Speed, 
 	["Chains of Ice"] = 45524,
 	["Hamstring"] = 1715,
 	["Crippling Poison"] = 3408,
@@ -215,13 +215,10 @@ local abilities = {
 	-- Casts Lay on Hands on any group member if their health is below the threshold.    
 	["Lay on Hands"] = function()
 		if enables["Lay on Hands"] then
-			-- Check if the player is in an arena
 			local inArena = select(2, IsInInstance()) == "arena"
 			if inArena then
-				-- If in an arena, do not use Lay on Hands
 				return false
 			end
-
 			for i = 1, #ni.members.sort() do
 				if ni.members[i]:hp() <= values["Lay on HandsThreshold"]
 					and not ni.members[i]:debuff("Forbearance") 
@@ -463,17 +460,18 @@ local abilities = {
     end,
 
 	-- Hand of Freedom
-	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, or Stun debuff and the player has line of sight to them.
+	-- Casts Hand of Freedom on any group member in combat if they have a Snare, Root, Stun, or Slow debuff and the player has line of sight to them.
 	["Hand of Freedom"] = function()
 		if enables["Hand of Freedom"] then
 			for i = 1, #ni.members.sort() do
-				if ni.members[i]:combat() 
-					and ni.healing.candispel(ni.members[i].guid) 
+				local member = ni.members[i]
+				if member:combat() 
+					and (ni.healing.candispel(member.guid) or member:hasdebuff(HoFDebuff))
 					and ucheck() 
 					and ni.spell.available("Hand of Freedom") 
-					and ni.members[i]:valid("Hand of Freedom", false, true) 
+					and member:valid("Hand of Freedom", false, true) 
 				then
-					ni.spell.cast("Hand of Freedom", ni.members[i].guid)
+					ni.spell.cast("Hand of Freedom", member.guid)
 					print("Hand of Freedom")
 					return true
 				end
@@ -534,7 +532,7 @@ local abilities = {
 	["Holy Shock"] = function()
 		if enables["Holy Shock"] then
 			for i = 1, #ni.members.sort() do
-				if (ni.members[i]:hp() <= values["Holy ShockThreshold"] or ni.unit.hp("player") <= values["Holy ShockThreshold"])
+				if ni.members[i]:hp() <= values["Holy ShockThreshold"]
 					and ucheck()
 					and ni.spell.available("Holy Shock")
 					and ni.members[i]:valid("Holy Shock", false, true)
@@ -556,7 +554,7 @@ local abilities = {
 			local hasInfusionOfLight = ni.unit.buff("player", "Infusion of Light")
 			for i = 1, #ni.members.sort() do
 				if (not isMoving or hasInfusionOfLight)
-					and (ni.members[i]:hp() <= values["Flash of LightThreshold"] or ni.unit.hp("player") <= values["Flash of LightThreshold"])
+					and ni.members[i]:hp() <= values["Flash of LightThreshold"]
 					and ucheck()
 					and ni.spell.available("Flash of Light")
 					and ni.members[i]:valid("Flash of Light", false, true)
