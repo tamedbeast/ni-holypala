@@ -38,8 +38,8 @@ local values = {
 	--["Hand of FreedomThreshold"] = 0,
 	["Hand of FreedomThreshold"] = 65,
 	["Bauble of True BloodThreshold"] = 40,
-	["Holy ShockThreshold"] = 88,
-	["Flash of LightThreshold"] = 88,
+	["Holy ShockThreshold"] = 85,
+	["Flash of LightThreshold"] = 85,
 	--["CleanseThreshold"] = 0,
 	--["Sacred Shield"] = 0,
 	--["Beacon of Light"] = 0,
@@ -296,7 +296,7 @@ local abilities = {
 					and UnitAffectingCombat("player") 
 				then
 					ni.spell.cast("Divine Sacrifice")
-					print("Divine Sacrifice cast to protect ", member.name)
+					print("Divine Sacrifice cast to protect ", ni.members[i].name)
 					return true
 				end
 			end
@@ -320,7 +320,7 @@ local abilities = {
 					and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
 				then
 					ni.spell.cast("Hand of Sacrifice", member.guid)
-					print("Hand of Sacrifice cast on ", member.name)
+					print("Hand of Sacrifice cast on ", ni.members[i].name)
 					return true
 				end
 			end
@@ -450,7 +450,7 @@ local abilities = {
                 then
                     ni.player.lookat(target)
                     ni.spell.cast("Hammer of Wrath", target)
-                    print("Hammer of Wrath")
+                    print("Hammer of Wrath", ni.members[i].name)
                     return true
                 end
             end
@@ -471,7 +471,7 @@ local abilities = {
 					and member:valid("Hand of Freedom", false, true) 
 				then
 					ni.spell.cast("Hand of Freedom", member.guid)
-					print("Hand of Freedom")
+					print("Hand of Freedom", ni.members[i].name)
 					return true
 				end
 			end
@@ -492,7 +492,7 @@ local abilities = {
                     and ni.spell.valid(target, "Hammer of Justice") 
                 then
                     ni.spell.cast("Hammer of Justice", target)
-                    print("Hammer of Justice")
+                    print("Hammer of Justice", ni.members[i].name)
                     return true
                 end
             end
@@ -518,7 +518,7 @@ local abilities = {
 					and member:los()
 				then
 					ni.player.useitem(itemId, member.guid)
-					print("Bauble of True Blood")
+					print("Bauble of True Blood", ni.members[i].name)
 					return true
 				end
 			end
@@ -537,7 +537,7 @@ local abilities = {
 					and ni.members[i]:valid("Holy Shock", false, true)
 				then
 					ni.spell.cast("Holy Shock", ni.members[i].guid)
-					print("Holy Shock")
+					print("Holy Shock", ni.members[i].name)
 					return true
 				end
 			end
@@ -559,7 +559,7 @@ local abilities = {
 					and ni.members[i]:valid("Flash of Light", false, true)
 				then
 					ni.spell.cast("Flash of Light", ni.members[i].guid)
-					print("Flash of Light")
+					print("Flash of Light", ni.members[i].name)
 					return true
 				end
 			end
