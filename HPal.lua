@@ -23,30 +23,28 @@ local queue = {
 
 local values = {
 	["Divine ShieldThreshold"] = 35,
-	["Hand of ProtectionThreshold"] = 35,
 	["Lay on HandsThreshold"] = 35,
 	["Divine ProtectionThreshold"] = 35,
+	["Hand of ProtectionThreshold"] = 35,
 	["Divine SacrificeThreshold"] = 50,
 	["Hand of SacrificeThreshold"] = 65,
 	["Use HealthstoneThreshold"] = 40,
-	["Hammer of WrathThreshold"] = 20,
-	--["Hammer of JusticeThreshold] = 0,
+	--["Sacred ShieldThreshold"] = 0,
+	--["Beacon of LightThreshold"] = 0,
 	["Aura MasteryThreshold"] = 65,
 	["Divine FavorThreshold"] = 75,
 	["Divine IlluminationThreshold"] = 65,
-	--["Hand of FreedomThreshold"] = 0,
 	["Hand of FreedomThreshold"] = 65,
+	["Hammer of WrathThreshold"] = 20,
+	--["Hammer of JusticeThreshold"] = 0,
 	["Bauble of True BloodThreshold"] = 50,
 	["Holy ShockThreshold"] = 85,
 	["Flash of LightThreshold"] = 85,
 	--["CleanseThreshold"] = 0,
-	--["Sacred Shield"] = 0,
-	--["Beacon of Light"] = 0,
-	--["Blessing of Kings"] = 0,
+	--["Blessing of KingsThreshold"] = 0,
 }
 
 local enables = {
-	["Sacred Shield"] = true,
 	["Divine Shield"] = true,
 	["Lay on Hands"] = true,
 	["Divine Protection"] = true,
@@ -137,7 +135,7 @@ local function GUICallback(key, item_type, value)
     end
 end
 
-
+-- GUI
 local items = {
 	settingsfile = "HPal.json",
     callback = GUICallback,
@@ -280,7 +278,7 @@ local abilities = {
 	end,
     
     -- Divine Sacrifice
-    -- Casts Divine Sacrifice to protect any group member if their health is below the threshold and the player is not under Divine Shield or Divine Protection.
+    -- Casts Divine Sacrifice to protect any group member if their health is below the threshold.
 	["Divine Sacrifice"] = function()
 		if enables["Divine Sacrifice"] then
 			for i = 1, #ni.members.sort() do
@@ -290,7 +288,6 @@ local abilities = {
 					and ucheck()
 					and ni.spell.available("Divine Sacrifice")
 					and member:combat()
-					and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Divine Protection"))
 					and UnitAffectingCombat("player") 
 				then
 					ni.spell.cast("Divine Sacrifice")
@@ -313,9 +310,7 @@ local abilities = {
 					and ucheck()
 					and ni.spell.available("Hand of Sacrifice")
 					and member:valid("Hand of Sacrifice")
-					and not ni.spell.available("Divine Sacrifice")
 					and member:combat()
-					and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
 				then
 					ni.spell.cast("Hand of Sacrifice", member.guid)
 					print("Hand of Sacrifice cast on ", ni.members[i].name)
@@ -350,7 +345,8 @@ local abilities = {
         if enables["Sacred Shield"]
 			and not ni.unit.buff("player", "Sacred Shield") 
             and ucheck()
-            and ni.spell.available("Sacred Shield") 
+            and ni.spell.available("Sacred Shield")
+			and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
         then
             ni.spell.cast("Sacred Shield", "player")
             print("Sacred Shield")
@@ -365,7 +361,8 @@ local abilities = {
         if enables["Beacon of Light"] 
 			and not ni.unit.buff("player", "Beacon of Light") 
             and ucheck()
-            and ni.spell.available("Beacon of Light") 
+            and ni.spell.available("Beacon of Light")
+			and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
         then
             ni.spell.cast("Beacon of Light", "player")
             print("Beacon of Light")
@@ -381,9 +378,9 @@ local abilities = {
 			and ni.unit.hp("player") <= values["Aura MasteryThreshold"] 
             and ni.unit.buff("player", "Concentration Aura") 
             and ucheck() 
-            and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection")) 
             and ni.spell.available("Aura Mastery") 
             and UnitAffectingCombat("player") 
+			and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
         then
             ni.spell.cast("Aura Mastery", "player")
             print("Aura Mastery")
