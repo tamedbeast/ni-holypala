@@ -73,7 +73,7 @@ local enables = {
 }
 
 local HoFDebuff = {
-	-- Root, Ensnared, Mod Decrease Speed, 
+	-- Root, Ensnared, Mod Decrease Speed
 	["Chains of Ice"] = 45524,
 	["Hamstring"] = 1715,
 	["Crippling Poison"] = 3408,
@@ -123,7 +123,6 @@ local HoFDebuff = {
 	["Curse of Exhaustion"] = 18223,
 	["Binding Heal"] = 63311,
 	["Healing Touch"] = 23694,
-	--["Hamstring"] = 1715,
 	["Piercing Howl"] = 12323,
 	["Frost Grenade"] = 39965,
 	["Frost Presence"] = 55536,
