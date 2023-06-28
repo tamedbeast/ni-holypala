@@ -472,63 +472,54 @@ local abilities = {
 	["Bauble of True Blood"] = function()
 		local itemName = "Bauble of True Blood"
 		local itemId = GetItemIdByName(itemName)
-		if enables["Bauble of True Blood"]
-			and ni.player.hasitemequipped(itemId)
+		if enables["Bauble of True Blood"] 
+			and ni.player.hasitemequipped(itemId) 
 		then
-			local membersInRange = ni.members.inrange("player", 40)
-			for i = 1, #membersInRange do
-				local member = membersInRange[i]
-				if member:hp() <= values["Bauble of True BloodThreshold"]
-					and ni.player.itemcd(itemId) == 0
-					and member:combat()
-					and member:los()
-				then
-					ni.player.useitem(itemId, member.guid)
-					print("Bauble of True Blood", ni.members[i].name)
-					return true
-				end
+			local lowMember = ni.members.inrangebelow("player", 40, values["Bauble of True BloodThreshold"])[1]
+			if lowMember 
+				and lowMember:valid("Bauble of True Blood", false, true) 
+				and ni.player.itemcd(itemId) == 0 
+			then
+				ni.player.useitem(itemId, lowMember.guid)
+				print("Bauble of True Blood", lowMember.name)
+				return true
 			end
 		end
-		return false
 	end,
+
 
 	-- Holy Shock
 	["Holy Shock"] = function()
 		if enables["Holy Shock"]
 			and ni.spell.available("Holy Shock")
 		then
-			for i = 1, #ni.members.sort() do
-				if ni.members[i]:hp() <= values["Holy ShockThreshold"]
-					and ni.members[i]:valid("Holy Shock", false, true)
-				then
-					ni.spell.cast("Holy Shock", ni.members[i].guid)
-					print("Holy Shock", ni.members[i].name)
-					return true
-				end
+			local lowMember = ni.members.inrangebelow("player", 40, values["Holy ShockThreshold"])[1]
+			if lowMember 
+				and lowMember:valid("Holy Shock", false, true) 
+			then
+				ni.spell.cast("Holy Shock", lowMember.guid)
+				print("Holy Shock", lowMember.name)
+				return true
 			end
 		end
-		return false
 	end,
 
 	-- Flash of Light
 	["Flash of Light"] = function()
-		if enables["Flash of Light"]
-			and ni.spell.available("Flash of Light")
-		then
-			local isMoving = ni.player.movingfor(0.1)
-			local hasInfusionOfLight = ni.unit.buff("player", "Infusion of Light")
-			for i = 1, #ni.members.sort() do
-				if (not isMoving or hasInfusionOfLight)
-					and ni.members[i]:hp() <= values["Flash of LightThreshold"]
-					and ni.members[i]:valid("Flash of Light", false, true)
+		if enables["Flash of Light"] then
+			if (not ni.player.movingfor(0.1) or ni.unit.buff("player", "Infusion of Light"))
+				and ni.spell.available("Flash of Light") 
+			then
+				local lowMember = ni.members.inrangebelow("player", 40, values["Flash of LightThreshold"])[1]
+				if lowMember 
+					and lowMember:valid("Flash of Light", false, true) 
 				then
-					ni.spell.cast("Flash of Light", ni.members[i].guid)
-					print("Flash of Light", ni.members[i].name)
-					return true
+					ni.spell.cast("Flash of Light", lowMember.guid)
+					print("Flash of Light", lowMember.name)
+					return true;
 				end
 			end
 		end
-		return false
 	end,
 
 	-- Cleanse
