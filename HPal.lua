@@ -125,8 +125,6 @@ local HoFDebuff = {
 	"Dazed",
 }
 
-local cleanseDebuff = {34916, 34917, 34919, 48159, 48160, 30404, 30405, 31117, 34438, 35183, 43522, 47841, 47843, 65812, 68154, 68155, 68156, 44461, 55359, 55360, 55361, 55362, 61429}
-
 local function GUICallback(key, item_type, value)
     if item_type == "enabled" then
         local ability = key:gsub("Threshold", "")
@@ -146,7 +144,7 @@ local items = {
 }
 
 for _, ability in ipairs(queue) do
-    if ability ~= "Pause" and "Cache" then
+    if ability ~= "Pause" then
         table.insert(items, {
             type = "entry",
             text = ability,
@@ -304,6 +302,7 @@ local abilities = {
 			local lowMember = ni.members.inrangebelow("player", 40, values["Hand of SacrificeThreshold"])[1]
 			if lowMember 
 				and lowMember:valid("Hand of Sacrifice", false, true) 
+				and lowMember.guid ~= UnitGUID("player")
 			then
 				ni.spell.cast("Hand of Sacrifice", lowMember.guid)
 				print("Hand of Sacrifice", lowMember.name)
@@ -382,21 +381,22 @@ local abilities = {
 	-- Divine Favor
 	["Divine Favor"] = function()
 		if enables["Divine Favor"]
-			and ni.spell.available("Divine Favor")
-		then
-			if ni.unit.hp("player") <= values["Divine FavorThreshold"]
+				and ni.spell.available("Divine Favor")
 				and ni.spell.available("Holy Shock")
-				and UnitAffectingCombat("player")
 			then
-				local lowMember = ni.members.inrangebelow("player", 40, values["Divine FavorThreshold"])[1]
-				if lowMember 
-					and lowMember:valid("Holy Shock", false, true) 
+				if ni.unit.hp("player") <= values["Divine FavorThreshold"] 
+					and UnitAffectingCombat("player") 
 				then
 					ni.spell.cast("Divine Favor", "player")
-					ni.spell.cast("Holy Shock", lowMember.guid)
 					print("Divine Favor")
-					print("Holy Shock", lowMember.name)
-					return true
+					for i = 1, #ni.members.sort() do
+						if ni.members[i]:valid("Holy Shock", false, true) 
+						then
+							ni.spell.cast("Holy Shock", ni.members[i].guid)
+							print("Holy Shock")
+							return true
+						end
+					end
 				end
 			end
 		end
@@ -458,7 +458,7 @@ local abilities = {
 					and hasHoFDebuff
 				then
 					ni.spell.cast("Hand of Freedom", member.unit)
-					print("Hand of Freedom cast", member.name)
+					print("Hand of Freedom", member.name)
 					return true
 				end
 			end
