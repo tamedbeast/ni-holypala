@@ -69,61 +69,60 @@ local enables = {
 }
 
 local HoFDebuff = {
-	-- Root, Ensnared, Mod Decrease Speed
-	["Chains of Ice"] = 45524,
-	["Hamstring"] = 1715,
-	["Crippling Poison"] = 3408,
-	["Frostbolt"] = 59638,
-	["Seal of Justice"] = 20164,
-	["Cleave"] = 25809,
-	["Slow"] = 31589,
-	["Earthgrab Totem"] = 51585,
-	["Ice Barrier"] = 50040,
-	["Chilblains"] = 50041,
-	["Blade Twisting"] = 31124,
-	["Frost Nova"] = 122,
-	["Frostfire Bolt"] = 44614,
-	["Dazed"] = 1604,
-	["Entangling Roots"] = 339,
-	["Feral Charge - Cat"] = 45334,
-	["Infected Wounds"] = 58179,
-	["Typhoon"] = 61391,
-	["Counterattack"] = 19306,
-	["Entrapment"] = 19185,
-	["Concussive Barrage"] = 35101,
-	["Concussive Shot"] = 5116,
-	["Wing Clip"] = 2974,
-	["Glyph of Frost Nova"] = 61394,
-	["Frostfire Orb"] = 54644,
-	["Black Arrow"] = 50245,
-	["T.N.T."] = 50271,
-	["Venom Web Spray"] = 54706,
-	["Web"] = 4167,
-	["Freeze"] = 33395,
-	["Shattered Barrier"] = 55080,
-	["Blast Wave"] = 11113,
-	["Chilled"] = 6136,
-	["Cone of Cold"] = 120,
-	["Frostbolt"] = 116,
-	["Frostfire Bolt"] = 44614,
-	["Slow"] = 31589,
-	["Seal of Command"] = 20170,
-	["Blade Flurry"] = 31125,
-	["Crippling Poison II"] = 3409,
-	["Deadly Throw"] = 26679,
-	["Earth and Moon"] = 64695,
-	["Freeze"] = 63685,
-	["Frost Shock"] = 8056,
-	["Frostbrand Attack"] = 8034,
-	["Aftermath"] = 18118,
-	["Curse of Exhaustion"] = 18223,
-	["Binding Heal"] = 63311,
-	["Healing Touch"] = 23694,
-	["Piercing Howl"] = 12323,
-	["Frost Grenade"] = 39965,
-	["Frost Presence"] = 55536,
-	["Ice Barrier"] = 13099,
-	["Dazed"] = 29703
+	"Chains of Ice",
+	"Hamstring",
+	"Crippling Poison",
+	"Frostbolt",
+	"Seal of Justice",
+	"Cleave",
+	"Slow",
+	"Earthgrab Totem",
+	"Ice Barrier",
+	"Chilblains",
+	"Blade Twisting",
+	"Frost Nova",
+	"Frostfire Bolt",
+	"Dazed",
+	"Entangling Roots",
+	"Feral Charge - Cat",
+	"Infected Wounds",
+	"Typhoon",
+	"Counterattack",
+	"Entrapment",
+	"Concussive Barrage",
+	"Concussive Shot",
+	"Wing Clip",
+	"Glyph of Frost Nova",
+	"Frostfire Orb",
+	"Black Arrow",
+	"T.N.T.",
+	"Venom Web Spray",
+	"Web",
+	"Freeze",
+	"Shattered Barrier",
+	"Blast Wave",
+	"Chilled",
+	"Cone of Cold",
+	"Frostbolt",
+	"Frostfire Bolt",
+	"Slow",
+	"Seal of Command",
+	"Blade Flurry",
+	"Crippling Poison II",
+	"Deadly Throw",
+	"Earth and Moon",
+	"Freeze",
+	"Frost Shock",
+	"Frostbrand Attack",
+	"Aftermath",
+	"Curse of Exhaustion",
+	"Binding Heal",
+	"Healing Touch",
+	"Piercing Howl",
+	"Frost Grenade",
+	"Frost Presence",
+	"Ice Barrier",
+	"Dazed",
 }
 
 local cleanseDebuff = {34916, 34917, 34919, 48159, 48160, 30404, 30405, 31117, 34438, 35183, 43522, 47841, 47843, 65812, 68154, 68155, 68156, 44461, 55359, 55360, 55361, 55362, 61429}
@@ -441,7 +440,9 @@ local abilities = {
 
 	-- Hand of Freedom
 	["Hand of Freedom"] = function()
-		if enables["Hand of Freedom"] then
+		if enables["Hand of Freedom"]
+			and ni.spell.available("Hand of Freedom") 
+		then
 			for i = 1, #ni.members.sort() do
 				local member = ni.members[i]
 				local hasHoFDebuff = false
@@ -451,13 +452,12 @@ local abilities = {
 						break
 					end
 				end
-				if member:combat()
-					and (ni.healing.candispel(member.guid) or hasHoFDebuff)
-					and ni.spell.available("Hand of Freedom")
-					and member:valid("Hand of Freedom", false, true)
+				if member:combat() 
+					and (ni.healing.candispel(member.guid) or hasHoFDebuff) 
+					and member:valid("Hand of Freedom", false, true) 
 				then
-					ni.spell.cast("Hand of Freedom", member.guid)
-					print("Hand of Freedom", ni.members[i].name)
+					ni.spell.cast("Hand of Freedom", member.unit)
+					print("Hand of Freedom cast on " .. member.name)
 					return true
 				end
 			end
