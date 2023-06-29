@@ -452,12 +452,12 @@ local abilities = {
 						break
 					end
 				end
-				if member:combat() 
-					and (ni.healing.candispel(member.guid) or hasHoFDebuff) 
-					and member:valid("Hand of Freedom", false, true) 
+				if member:valid("Hand of Freedom", false, true) 
+					and member:combat() 
+					and hasHoFDebuff
 				then
 					ni.spell.cast("Hand of Freedom", member.unit)
-					print("Hand of Freedom cast on " .. member.name)
+					print("Hand of Freedom cast", member.name)
 					return true
 				end
 			end
