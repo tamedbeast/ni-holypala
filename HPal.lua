@@ -420,12 +420,13 @@ local abilities = {
 
 	-- Hammer of Wrath
 	["Hammer of Wrath"] = function()
-		if enables["Hammer of Wrath"] then
+		if enables["Hammer of Wrath"]
+			and ni.spell.available("Hammer of Wrath")
+		then
 			local enemies = ni.unit.enemiesinrange("player", 30)
 			for i = 1, #enemies do
 				local target = enemies[i].guid
 				if ni.unit.hp(target) <= values["Hammer of WrathThreshold"]
-					and ni.spell.available("Hammer of Wrath")
 					and ni.spell.valid(target, "Hammer of Wrath", false, true)
 				then
 					ni.player.lookat(target)
