@@ -4,7 +4,8 @@ This project is a World of Warcraft rotation specifically designed for healing a
 
 The script is tailored for the World of Warcraft Wrath of the Lich King, patch 3.3.5a. It has been tested on the Warmane server, Blackrock realm.
 
-![WoWScrnShot_062823_161308](https://github.com/nelbin4/ni-holypala/assets/20941975/879b604e-8407-4faa-b55c-f4d51f399262)
+![WoWScrnShot_062923_155142](https://github.com/nelbin4/ni-holypala/assets/20941975/a61da6fd-a512-4b58-883e-e8b3942cb931)
+
 
 
 ## Getting Started
