@@ -281,7 +281,7 @@ local abilities = {
                 if lowMember 
                     and lowMember:valid("Divine Sacrifice", false, true) 
                 then
-                    ni.spell.cast("Divine Sacrifice", lowMember.guid)
+                    ni.spell.cast("Divine Sacrifice", "player")
                     print("Divine Sacrifice", lowMember.name)
                     return true
                 end
