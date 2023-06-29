@@ -125,6 +125,27 @@ local HoFDebuff = {
 	"Dazed",
 }
 
+-- Function to get item ID by name
+local function GetItemIdByName(itemName)
+    if not itemName then return end
+    local _, itemLink = GetItemInfo(itemName)
+    if itemLink then
+        return tonumber(itemLink:match("item:(%d+)"))
+    end
+    return nil
+end
+
+-- Function to get spell ID by name
+local function GetSpellIdByName(spellName)
+    if not spellName then return end
+    local spellLink = GetSpellLink(spellName)
+    if spellLink then
+        return tonumber(spellLink:match("spell:(%d+)"))
+    end
+    return nil
+end
+
+
 local function GUICallback(key, item_type, value)
     if item_type == "enabled" then
         local ability = key:gsub("Threshold", "")
@@ -145,24 +166,16 @@ local items = {
 
 for _, ability in ipairs(queue) do
     if ability ~= "Pause" then
+        local spellId = GetSpellIdByName(ability)
+        local spellIcon = spellId and ni.spell.icon(spellId) or ""
         table.insert(items, {
             type = "entry",
-            text = ability,
+            text = spellIcon .. " " .. ability,
             enabled = enables[ability],
-            value = values[ability.."Threshold"],
-            key = ability.."Threshold"
+            value = values[ability .. "Threshold"],
+            key = ability .. "Threshold"
         })
     end
-end
-
--- Function to get item ID by name
-local function GetItemIdByName(itemName)
-    if not itemName then return end
-    local _, itemLink = GetItemInfo(itemName)
-    if itemLink then
-        return tonumber(itemLink:match("item:(%d+)"))
-    end
-    return nil
 end
 
 local abilities = {
