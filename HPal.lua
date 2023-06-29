@@ -68,7 +68,63 @@ local enables = {
 	["Blessing of Kings"] = true,
 }
 
-local HoFDebuff = {45524, 1715, 3408, 59638, 20164, 25809, 31589, 51585, 50040, 50041, 31124, 122, 44614, 1604, 339, 45334, 58179, 61391, 19306, 19185, 35101, 5116, 2974, 61394, 54644, 50245, 50271, 54706, 4167, 33395, 55080, 11113, 6136, 120, 116, 44614, 31589, 20170, 31125, 3409, 26679, 64695, 63685, 8056, 8034, 18118, 18223, 63311, 23694, 1715, 12323, 39965, 55536, 13099, 29703}
+local HoFDebuff = {
+	-- Root, Ensnared, Mod Decrease Speed
+	["Chains of Ice"] = 45524,
+	["Hamstring"] = 1715,
+	["Crippling Poison"] = 3408,
+	["Frostbolt"] = 59638,
+	["Seal of Justice"] = 20164,
+	["Cleave"] = 25809,
+	["Slow"] = 31589,
+	["Earthgrab Totem"] = 51585,
+	["Ice Barrier"] = 50040,
+	["Chilblains"] = 50041,
+	["Blade Twisting"] = 31124,
+	["Frost Nova"] = 122,
+	["Frostfire Bolt"] = 44614,
+	["Dazed"] = 1604,
+	["Entangling Roots"] = 339,
+	["Feral Charge - Cat"] = 45334,
+	["Infected Wounds"] = 58179,
+	["Typhoon"] = 61391,
+	["Counterattack"] = 19306,
+	["Entrapment"] = 19185,
+	["Concussive Barrage"] = 35101,
+	["Concussive Shot"] = 5116,
+	["Wing Clip"] = 2974,
+	["Glyph of Frost Nova"] = 61394,
+	["Frostfire Orb"] = 54644,
+	["Black Arrow"] = 50245,
+	["T.N.T."] = 50271,
+	["Venom Web Spray"] = 54706,
+	["Web"] = 4167,
+	["Freeze"] = 33395,
+	["Shattered Barrier"] = 55080,
+	["Blast Wave"] = 11113,
+	["Chilled"] = 6136,
+	["Cone of Cold"] = 120,
+	["Frostbolt"] = 116,
+	["Frostfire Bolt"] = 44614,
+	["Slow"] = 31589,
+	["Seal of Command"] = 20170,
+	["Blade Flurry"] = 31125,
+	["Crippling Poison II"] = 3409,
+	["Deadly Throw"] = 26679,
+	["Earth and Moon"] = 64695,
+	["Freeze"] = 63685,
+	["Frost Shock"] = 8056,
+	["Frostbrand Attack"] = 8034,
+	["Aftermath"] = 18118,
+	["Curse of Exhaustion"] = 18223,
+	["Binding Heal"] = 63311,
+	["Healing Touch"] = 23694,
+	["Piercing Howl"] = 12323,
+	["Frost Grenade"] = 39965,
+	["Frost Presence"] = 55536,
+	["Ice Barrier"] = 13099,
+	["Dazed"] = 29703
+}
 
 local cleanseDebuff = {34916, 34917, 34919, 48159, 48160, 30404, 30405, 31117, 34438, 35183, 43522, 47841, 47843, 65812, 68154, 68155, 68156, 44461, 55359, 55360, 55361, 55362, 61429}
 
@@ -166,7 +222,8 @@ local abilities = {
 				return false
 			end
 			if ni.spell.available("Lay on Hands") 
-			and UnitAffectingCombat("player") 
+				and UnitAffectingCombat("player")
+				and not ni.unit.debuff("player", "Forbearance")			
 			then
 				local lowMember = ni.members.inrangebelow("player", 40, values["Lay on HandsThreshold"])[1]
 				if lowMember 
