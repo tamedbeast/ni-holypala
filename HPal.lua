@@ -41,7 +41,7 @@ local values = {
 	["Bauble of True BloodThreshold"] = 50,
 	["Holy ShockThreshold"] = 85,
 	["Flash of LightThreshold"] = 85,
-	--["CleanseThreshold"] = 0,
+	["CleanseThreshold"] = 65,
 	--["Blessing of KingsThreshold"] = 0,
 }
 
@@ -544,7 +544,7 @@ local abilities = {
     ["Cleanse"] = function()
         if enables["Cleanse"] then
             if ni.spell.available("Cleanse") then
-                if ni.player.power("mana") > values["CleanseManaThreshold"] then
+                if ni.unit.power("player") > values["CleanseThreshold"] then
                     local dispelMember = ni.members.inrange("player", 40)
                     if dispelMember 
                         and dispelMember.guid
