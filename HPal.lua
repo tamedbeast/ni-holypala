@@ -193,9 +193,7 @@ local abilities = {
     -- Divine Shield
     ["Divine Shield"] = function()
         if enables["Divine Shield"] then
-            if ni.spell.available("Divine Shield")
-				and UsableSilence("Divine Shield")
-			then
+            if UsableSilence(GetSpellIdByName("Divine Shield")) then
                 if ni.unit.hp("player") <= values["Divine ShieldThreshold"]
                     and not ni.unit.debuff("player", "Forbearance")
                     and UnitAffectingCombat("player")
@@ -215,7 +213,7 @@ local abilities = {
 	-- Hand of Protection
     ["Hand of Protection"] = function()
         if enables["Hand of Protection"] then
-            if ni.spell.available("Hand of Protection") then
+            if UsableSilence(GetSpellIdByName("Hand of Protection")) then
                 local lowMember = ni.members.inrangebelow("player", 30, values["Hand of ProtectionThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Hand of Protection", false, true) 
@@ -238,7 +236,7 @@ local abilities = {
             if inArena then
                 return false
             end
-            if ni.spell.available("Lay on Hands") then
+            if UsableSilence(GetSpellIdByName("Lay on Hands")) then
                 local lowMember = ni.members.inrangebelow("player", 40, values["Lay on HandsThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Lay on Hands", false, true) 
@@ -257,7 +255,7 @@ local abilities = {
     -- Divine Protection
     ["Divine Protection"] = function()
         if enables["Divine Protection"] then
-            if ni.spell.available("Divine Protection") then
+            if UsableSilence(GetSpellIdByName("Divine Protection")) then
                 if ni.unit.hp("player") <= values["Divine ShieldThreshold"]
                     and not ni.unit.debuff("player", "Forbearance")
                     and UnitAffectingCombat("player")
@@ -277,7 +275,7 @@ local abilities = {
     -- Divine Sacrifice
     ["Divine Sacrifice"] = function()
         if enables["Divine Sacrifice"] then
-            if ni.spell.available("Divine Sacrifice") 
+            if UsableSilence(GetSpellIdByName("Divine Sacrifice"))
                 and UnitAffectingCombat("player")
             then
                 local lowMember = ni.members.inrangebelow("player", 30, values["Divine SacrificeThreshold"])[1]
@@ -296,7 +294,7 @@ local abilities = {
     -- Hand of Sacrifice
     ["Hand of Sacrifice"] = function()
         if enables["Hand of Sacrifice"] then
-            if ni.spell.available("Hand of Sacrifice")
+            if UsableSilence(GetSpellIdByName("Hand of Sacrifice"))
                 and UnitAffectingCombat("player")
             then
                 local lowMember = ni.members.inrangebelow("player", 30, values["Hand of SacrificeThreshold"])[1]
@@ -332,7 +330,7 @@ local abilities = {
     -- Aura Mastery
     ["Aura Mastery"] = function()
         if enables["Aura Mastery"] then
-            if ni.spell.available("Aura Mastery") then
+            if UsableSilence(GetSpellIdByName("Aura Mastery")) then
                 if ni.unit.hp("player") <= values["Aura MasteryThreshold"]
                     and ni.unit.buff("player", "Concentration Aura")
                     and UnitAffectingCombat("player")
@@ -350,8 +348,8 @@ local abilities = {
     -- Divine Favor
     ["Divine Favor"] = function()
         if enables["Divine Favor"] then
-            if ni.spell.available("Divine Favor")
-                and ni.spell.available("Holy Shock")
+            if UsableSilence(GetSpellIdByName("Divine Favor")) 
+                and UsableSilence(GetSpellIdByName("Holy Shock"))
             then
                 if ni.unit.hp("player") <= values["Divine FavorThreshold"] 
                     and UnitAffectingCombat("player") 
@@ -374,7 +372,7 @@ local abilities = {
     -- Divine Illumination
     ["Divine Illumination"] = function()
         if enables["Divine Illumination"] then
-            if ni.spell.available("Divine Illumination") then
+            if UsableSilence(GetSpellIdByName("Divine Illumination")) then
                 if ni.unit.power("player") <= values["Divine IlluminationThreshold"]
                     and UnitAffectingCombat("player")
                 then
@@ -390,7 +388,7 @@ local abilities = {
     -- Hammer of Wrath
     ["Hammer of Wrath"] = function()
         if enables["Hammer of Wrath"] then
-            if ni.spell.available("Hammer of Wrath") then
+            if UsableSilence(GetSpellIdByName("Hammer of Wrath")) then
                 local enemies = ni.unit.enemiesinrange("player", 30)
                 for i = 1, #enemies do
                     local target = enemies[i].guid
@@ -411,7 +409,7 @@ local abilities = {
     -- Hand of Freedom
     ["Hand of Freedom"] = function()
         if enables["Hand of Freedom"] then
-            if ni.spell.available("Hand of Freedom") then
+            if UsableSilence(GetSpellIdByName("Hand of Freedom")) then
                 for i = 1, #ni.members.sort() do
                     local member = ni.members[i]
                     local hasHoFDebuff = false
@@ -438,7 +436,7 @@ local abilities = {
     -- Hammer of Justice
     ["Hammer of Justice"] = function()
         if enables["Hammer of Justice"] then 
-            if ni.spell.available("Hammer of Justice") then
+            if UsableSilence(GetSpellIdByName("Hammer of Justice"))  then
                 local targetEnemy = ni.unit.enemiesinrange("player", 10)
                 if targetEnemy 
                     and ni.spell.valid(targetEnemy, "Hammer of Justice") 
@@ -479,10 +477,10 @@ local abilities = {
     -- Holy Shock
     ["Holy Shock"] = function()
         if enables["Holy Shock"] then
-            if ni.spell.available("Holy Shock") then
+            if UsableSilence(GetSpellIdByName("Holy Shock"))  then
                 local lowMember = ni.members.inrangebelow("player", 40, values["Holy ShockThreshold"])[1]
                 if lowMember 
-                    and lowMember:valid("Holy Shock", false, true) 
+                    and lowMember:valid("Holy Shock", false, true)
                 then
                     ni.spell.cast("Holy Shock", lowMember.guid)
                     print("Holy Shock", lowMember.name)
@@ -497,11 +495,12 @@ local abilities = {
     ["Flash of Light"] = function()
         if enables["Flash of Light"] then
             if (not ni.player.movingfor(0.1) or ni.unit.buff("player", "Infusion of Light"))
-                and ni.spell.available("Flash of Light") 
+				and UsableSilence(GetSpellIdByName("Flash of Light"))				
             then
                 local lowMember = ni.members.inrangebelow("player", 40, values["Flash of LightThreshold"])[1]
                 if lowMember 
-                    and lowMember:valid("Flash of Light", false, true) 
+                    and lowMember:valid("Flash of Light", false, true)
+					and UsableSilence(GetSpellIdByName("Flash of Light"))
                 then
                     ni.spell.cast("Flash of Light", lowMember.guid)
                     print("Flash of Light", lowMember.name)
@@ -514,8 +513,9 @@ local abilities = {
     -- Cleanse
     ["Cleanse"] = function()
         if enables["Cleanse"] then
-            if ni.spell.available("Cleanse") then
-                if ni.unit.power("player") > values["CleanseThreshold"] then
+            if UsableSilence(GetSpellIdByName("Cleanse")) then
+                if ni.unit.power("player") > values["CleanseThreshold"]
+				then
                     local dispelMember = ni.members.inrange("player", 40)
                     if dispelMember 
                         and dispelMember.guid
@@ -537,7 +537,7 @@ local abilities = {
 	-- Sacred Shield
     ["Sacred Shield"] = function()
         if enables["Sacred Shield"] then
-            if ni.spell.available("Sacred Shield") then
+            if UsableSilence(GetSpellIdByName("Sacred Shield")) then
                 if not ni.unit.buff("player", "Sacred Shield")
                     and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
                 then
@@ -553,7 +553,7 @@ local abilities = {
     -- Beacon of Light
     ["Beacon of Light"] = function()
         if enables["Beacon of Light"] then
-            if ni.spell.available("Beacon of Light") then
+            if UsableSilence(GetSpellIdByName("Beacon of Light")) then
                 if not ni.unit.buff("player", "Beacon of Light")
                     and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
                 then
