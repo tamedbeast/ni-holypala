@@ -130,6 +130,24 @@ local function GetSpellIdByName(spellName)
     return nil
 end
 
+-- Function Usable Spells when under crowd control
+local function UsableSilence(spellid, stutter)
+	if tonumber(spellid) == nil then
+		spellid = ni.spell.id(spellid)
+	end
+	local result = false;
+	if spellid == nil or spellid == 0 then
+		return false;
+	end
+	local spellName = GetSpellInfo(spellid);
+	if not ni.player.isstunned()
+	and not ni.player.issilenced()
+	and ni.spell.available(spellid, stutter)
+	and IsUsableSpell(spellName) then
+		result = true;
+	end
+	return result;
+end;
 
 local function GUICallback(key, item_type, value)
     if item_type == "enabled" then
@@ -162,24 +180,6 @@ for _, ability in ipairs(queue) do
         })
     end
 end
-
-local function UsableSilence(spellid, stutter)
-	if tonumber(spellid) == nil then
-		spellid = ni.spell.id(spellid)
-	end
-	local result = false;
-	if spellid == nil or spellid == 0 then
-		return false;
-	end
-	local spellName = GetSpellInfo(spellid);
-	if not ni.player.isstunned()
-	and not ni.player.issilenced()
-	and ni.spell.available(spellid, stutter)
-	and IsUsableSpell(spellName) then
-		result = true;
-	end
-	return result;
-end;
 
 local abilities = {
     -- Pause
