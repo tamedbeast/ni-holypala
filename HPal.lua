@@ -301,6 +301,7 @@ local abilities = {
                 if lowMember 
                     and lowMember:valid("Hand of Sacrifice", false, true) 
                     and lowMember.guid ~= UnitGUID("player")
+					and not ni.unit.debuff("player", "Forbearance")
                 then
                     ni.spell.cast("Hand of Sacrifice", lowMember.guid)
                     print("Hand of Sacrifice", lowMember.name)
@@ -349,7 +350,7 @@ local abilities = {
     ["Divine Favor"] = function()
         if enables["Divine Favor"] then
             if UsableSilence(GetSpellIdByName("Divine Favor")) 
-                and UsableSilence(GetSpellIdByName("Holy Shock"))
+                and ni.spell.available("Holy Shock")
             then
                 if ni.unit.hp("player") <= values["Divine FavorThreshold"] 
                     and UnitAffectingCombat("player") 
