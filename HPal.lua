@@ -1,3 +1,7 @@
+local build = select(4, GetBuildInfo());
+local wotlk = build == 30300 or false;
+if wotlk then
+
 local queue = {
 	"Pause",
 	"Divine Shield",
@@ -108,8 +112,6 @@ local HoFDebuff = {
 	"Ice Trap"
 }
 
-
-
 -- Function to get item ID by name
 local function GetItemIdByName(itemName)
     if not itemName then return end
@@ -198,7 +200,7 @@ local abilities = {
     -- Divine Shield
     ["Divine Shield"] = function()
         if enables["Divine Shield"] then
-            if ni.spell.available("Divine Shield") 
+            if ni.spell.available("Divine Shield")
 				and UsableSilence("Divine Shield")
 			then
                 if ni.unit.hp("player") <= values["Divine ShieldThreshold"]
@@ -327,38 +329,6 @@ local abilities = {
                 then
                     ni.player.useitem("Fel Healthstone")
                     print("Healthstone")
-                    return true
-                end
-            end
-        end
-        return false
-    end,
-
-    -- Sacred Shield
-    ["Sacred Shield"] = function()
-        if enables["Sacred Shield"] then
-            if ni.spell.available("Sacred Shield") then
-                if not ni.unit.buff("player", "Sacred Shield")
-                    and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
-                then
-                    ni.spell.cast("Sacred Shield", "player")
-                    print("Sacred Shield")
-                    return true
-                end
-            end
-        end
-        return false
-    end,
-
-    -- Beacon of Light
-    ["Beacon of Light"] = function()
-        if enables["Beacon of Light"] then
-            if ni.spell.available("Beacon of Light") then
-                if not ni.unit.buff("player", "Beacon of Light")
-                    and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
-                then
-                    ni.spell.cast("Beacon of Light", "player")
-                    print("Beacon of Light")
                     return true
                 end
             end
@@ -571,6 +541,38 @@ local abilities = {
         return false
     end,
 
+	-- Sacred Shield
+    ["Sacred Shield"] = function()
+        if enables["Sacred Shield"] then
+            if ni.spell.available("Sacred Shield") then
+                if not ni.unit.buff("player", "Sacred Shield")
+                    and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
+                then
+                    ni.spell.cast("Sacred Shield", "player")
+                    print("Sacred Shield")
+                    return true
+                end
+            end
+        end
+        return false
+    end,
+
+    -- Beacon of Light
+    ["Beacon of Light"] = function()
+        if enables["Beacon of Light"] then
+            if ni.spell.available("Beacon of Light") then
+                if not ni.unit.buff("player", "Beacon of Light")
+                    and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
+                then
+                    ni.spell.cast("Beacon of Light", "player")
+                    print("Beacon of Light")
+                    return true
+                end
+            end
+        end
+        return false
+    end,
+	
     -- Blessing of Kings
     ["Blessing of Kings"] = function()
         if enables["Blessing of Kings"]
@@ -598,3 +600,18 @@ local function OnUnLoad()
 end
 
 ni.bootstrap.profile("HPal", queue, abilities, OnLoad, OnUnLoad)
+
+else
+    local queue = {
+        "Error",
+    };
+    local abilities = {
+        ["Error"] = function()
+            ni.vars.profiles.enabled = false;
+			if not wotlk then
+				ni.frames.floatingtext:message("This profile for WotLK 3.3.5a!")
+            end
+        end,
+    };
+    ni.bootstrap.profile("HPal", queue, abilities);
+end;
