@@ -76,7 +76,6 @@ local HoFDebuff = {
 	"Chains of Ice",
 	"Hamstring",
 	"Crippling Poison",
-	"Cleave",
 	"Earthgrab Totem",
 	"Ice Barrier",
 	"Blade Twisting",
