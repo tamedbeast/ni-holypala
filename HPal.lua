@@ -1,14 +1,12 @@
 local queue = {
 	"Pause",
 	"Divine Shield",
+	"Hand of Protection",
 	"Lay on Hands",
 	"Divine Protection",
-	"Hand of Protection",
 	"Divine Sacrifice",
 	"Hand of Sacrifice",
 	"Use Healthstone",
-	"Sacred Shield",
-	"Beacon of Light",
 	"Aura Mastery",
 	"Divine Favor",
 	"Divine Illumination",
@@ -19,6 +17,8 @@ local queue = {
 	"Holy Shock",
 	"Flash of Light",
 	"Cleanse",
+	"Sacred Shield",
+	"Beacon of Light",
 	"Blessing of Kings",
 }
 
@@ -72,17 +72,11 @@ local HoFDebuff = {
 	"Chains of Ice",
 	"Hamstring",
 	"Crippling Poison",
-	"Frostbolt",
-	"Seal of Justice",
 	"Cleave",
-	"Slow",
 	"Earthgrab Totem",
 	"Ice Barrier",
-	"Chilblains",
 	"Blade Twisting",
-	"Frost Nova",
 	"Frostfire Bolt",
-	"Dazed",
 	"Entangling Roots",
 	"Feral Charge - Cat",
 	"Infected Wounds",
@@ -92,38 +86,29 @@ local HoFDebuff = {
 	"Concussive Barrage",
 	"Concussive Shot",
 	"Wing Clip",
-	"Glyph of Frost Nova",
 	"Frostfire Orb",
-	"Black Arrow",
-	"T.N.T.",
 	"Venom Web Spray",
 	"Web",
+	"Pin",
 	"Freeze",
-	"Shattered Barrier",
-	"Blast Wave",
 	"Chilled",
 	"Cone of Cold",
-	"Frostbolt",
-	"Frostfire Bolt",
-	"Slow",
 	"Seal of Command",
 	"Blade Flurry",
 	"Crippling Poison II",
-	"Deadly Throw",
 	"Earth and Moon",
-	"Freeze",
 	"Frost Shock",
 	"Frostbrand Attack",
 	"Aftermath",
 	"Curse of Exhaustion",
-	"Binding Heal",
-	"Healing Touch",
 	"Piercing Howl",
 	"Frost Grenade",
 	"Frost Presence",
-	"Ice Barrier",
-	"Dazed",
+	"Demonic Breath",
+	"Ice Trap"
 }
+
+
 
 -- Function to get item ID by name
 local function GetItemIdByName(itemName)
@@ -187,12 +172,12 @@ local abilities = {
             or UnitChannelInfo("player")
             or UnitCastingInfo("player")
             or ni.player.islooting()
-            or ni.unit.isstunned("player")
-            or ni.unit.issilenced("player")
-            or ni.unit.ispacified("player")
-            or ni.unit.isdisarmed("player")
-            or ni.unit.isfleeing("player")
-            or ni.unit.ispossessed("player")
+            -- or ni.unit.isstunned("player")
+            -- or ni.unit.issilenced("player")
+            -- or ni.unit.ispacified("player")
+            -- or ni.unit.isdisarmed("player")
+            -- or ni.unit.isfleeing("player")
+            -- or ni.unit.ispossessed("player")
             or ni.unit.debuff("player", "Polymorph")
             or ni.unit.debuff("player", "Cyclone")
             or ni.unit.debuff("player", "Fear")
@@ -222,6 +207,25 @@ local abilities = {
         return false
     end,
 
+	-- Hand of Protection
+    ["Hand of Protection"] = function()
+        if enables["Hand of Protection"] then
+            if ni.spell.available("Hand of Protection") then
+                local lowMember = ni.members.inrangebelow("player", 30, values["Hand of ProtectionThreshold"])[1]
+                if lowMember 
+                    and lowMember:valid("Hand of Protection", false, true) 
+                    and not ni.unit.debuff(lowMember.guid, "Forbearance")
+                    and UnitAffectingCombat("player")
+                then
+                    ni.spell.cast("Hand of Protection", lowMember.guid)
+                    print("Hand of Protection", lowMember.name)
+                    return true
+                end
+            end
+        end
+        return false
+    end,
+	
     -- Lay on Hands
     ["Lay on Hands"] = function()
         if enables["Lay on Hands"] then
@@ -233,8 +237,8 @@ local abilities = {
                 local lowMember = ni.members.inrangebelow("player", 40, values["Lay on HandsThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Lay on Hands", false, true) 
-                    and UnitAffectingCombat("player")
-                    and not ni.unit.debuff("player", "Forbearance")
+                    and not ni.unit.debuff(lowMember.guid, "Forbearance")
+					and UnitAffectingCombat("player")
                 then
                     ni.spell.cast("Lay on Hands", lowMember.guid)
                     print("Lay on Hands", lowMember.name)
@@ -265,32 +269,13 @@ local abilities = {
         return false
     end,
 
-    -- Hand of Protection
-    ["Hand of Protection"] = function()
-        if enables["Hand of Protection"] then
-            if ni.spell.available("Hand of Protection") then
-                local lowMember = ni.members.inrangebelow("player", 40, values["Hand of ProtectionThreshold"])[1]
-                if lowMember 
-                    and lowMember:valid("Hand of Protection", false, true) 
-                    and not ni.unit.debuff("player", "Forbearance")
-                    and UnitAffectingCombat("player")
-                then
-                    ni.spell.cast("Hand of Protection", lowMember.guid)
-                    print("Hand of Protection", lowMember.name)
-                    return true
-                end
-            end
-        end
-        return false
-    end,
-
     -- Divine Sacrifice
     ["Divine Sacrifice"] = function()
         if enables["Divine Sacrifice"] then
             if ni.spell.available("Divine Sacrifice") 
                 and UnitAffectingCombat("player")
             then
-                local lowMember = ni.members.inrangebelow("player", 40, values["Divine SacrificeThreshold"])[1]
+                local lowMember = ni.members.inrangebelow("player", 30, values["Divine SacrificeThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Divine Sacrifice", false, true) 
                 then
@@ -309,7 +294,7 @@ local abilities = {
             if ni.spell.available("Hand of Sacrifice")
                 and UnitAffectingCombat("player")
             then
-                local lowMember = ni.members.inrangebelow("player", 40, values["Hand of SacrificeThreshold"])[1]
+                local lowMember = ni.members.inrangebelow("player", 30, values["Hand of SacrificeThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Hand of Sacrifice", false, true) 
                     and lowMember.guid ~= UnitGUID("player")
@@ -441,7 +426,7 @@ local abilities = {
                     then
                         ni.player.lookat(target)
                         ni.spell.cast("Hammer of Wrath", target)
-                        print("Hammer of Wrath", ni.members[i].name)
+                        print("Hammer of Wrath")
                         return true
                     end
                 end
