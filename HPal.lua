@@ -144,15 +144,6 @@ local function UsableSilence(spellid, stutter)
 	return result;
 end;
 
-local function GUICallback(key, item_type, value)
-    if item_type == "enabled" then
-        local ability = key:gsub("Threshold", "")
-        enables[ability] = value
-    elseif item_type == "value" then
-        values[key] = value
-    end
-end
-
 -- GUI
 local items = {
 	settingsfile = "HPal.json",
@@ -173,6 +164,15 @@ for _, ability in ipairs(queue) do
             value = values[ability .. "Threshold"],
             key = ability .. "Threshold"
         })
+    end
+end
+
+local function GUICallback(key, item_type, value)
+    if item_type == "enabled" then
+        local ability = key:gsub("Threshold", "")
+        enables[ability] = value
+    elseif item_type == "value" then
+        values[key] = value
     end
 end
 
@@ -570,6 +570,7 @@ local abilities = {
     ["Blessing of Kings"] = function()
         if enables["Blessing of Kings"]
             and ni.spell.available("Blessing of Kings")
+			and not UnitAffectingCombat("player")
         then
             local hasGreaterBlessing = ni.unit.buff("player", "Greater Blessing of Kings")
             local hasBlessing = ni.unit.buff("player", "Blessing of Kings")
