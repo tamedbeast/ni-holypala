@@ -16,8 +16,8 @@ local queue = {
 	"Hand of Freedom",
 	"Hammer of Wrath",
 	"Hammer of Justice",
-	"Bauble of True Blood",
 	"Divine Favor",
+	"Bauble of True Blood",
 	"Holy Shock",
 	"Flash of Light",
 	"Cleanse",
@@ -41,11 +41,11 @@ local values = {
 	["Hand of FreedomThreshold"] = 65,
 	["Hammer of WrathThreshold"] = 20,
 	--["Hammer of JusticeThreshold"] = 0,
-	["Bauble of True BloodThreshold"] = 50,
-	["Divine FavorThreshold"] = 75,
+	["Divine FavorThreshold"] = 30,
+	["Bauble of True BloodThreshold"] = 30,
 	["Holy ShockThreshold"] = 85,
 	["Flash of LightThreshold"] = 85,
-	["CleanseThreshold"] = 65,
+	["CleanseThreshold"] = 45,
 	--["Blessing of KingsThreshold"] = 0,
 }
 
@@ -64,8 +64,8 @@ local enables = {
 	["Hand of Freedom"] = true,
 	["Hammer of Wrath"] = true,
 	["Hammer of Justice"] = true,
-	["Bauble of True Blood"] = true,
 	["Divine Favor"] = true,
+	["Bauble of True Blood"] = true,
 	["Holy Shock"] = true,
 	["Flash of Light"] = true,
 	["Cleanse"] = true,
@@ -451,27 +451,6 @@ local abilities = {
         return false
     end,
 
-    -- Bauble of True Blood (Trinket)
-    ["Bauble of True Blood"] = function()
-		if enables["Bauble of True Blood"] 
-		then
-			if ni.player.hasitemequipped(idName.item("Bauble of True Blood")) 
-				and ni.player.itemcd(idName.item("Bauble of True Blood")) == 0
-				and UnitAffectingCombat("player")
-			then
-				local lowMember = ni.members.inrangebelow("player", 40, values["Bauble of True BloodThreshold"])[1]
-				if lowMember 
-					and lowMember:los() 
-				then
-					ni.player.useitem(idName.item("Bauble of True Blood"), lowMember.guid)
-					print("Bauble of True Blood", lowMember.name)
-					return true
-				end
-			end
-		end
-		return false
-	end,
-
 	-- Divine Favor
     ["Divine Favor"] = function()
 		if enables["Divine Favor"] 
@@ -494,7 +473,27 @@ local abilities = {
 		end
 		return false
 	end,
-
+	
+    -- Bauble of True Blood (Trinket)
+    ["Bauble of True Blood"] = function()
+		if enables["Bauble of True Blood"] 
+		then
+			if ni.player.hasitemequipped(idName.item("Bauble of True Blood")) 
+				and ni.player.itemcd(idName.item("Bauble of True Blood")) == 0
+				and UnitAffectingCombat("player")
+			then
+				local lowMember = ni.members.inrangebelow("player", 40, values["Bauble of True BloodThreshold"])[1]
+				if lowMember 
+					and lowMember:los() 
+				then
+					ni.player.useitem(idName.item("Bauble of True Blood"), lowMember.guid)
+					print("Bauble of True Blood", lowMember.name)
+					return true
+				end
+			end
+		end
+		return false
+	end,
 	
     -- Holy Shock
     ["Holy Shock"] = function()
@@ -535,29 +534,22 @@ local abilities = {
     end,
 
     -- Cleanse
-    ["Cleanse"] = function()
-        if enables["Cleanse"] then
-            if UsableSilence(idName.spell("Cleanse")) 
-			then
-                if ni.unit.power("player") > values["CleanseThreshold"]
+	["Cleanse"] = function()
+		if enables["Cleanse"]
+			and UsableSilence(idName.spell("Cleanse")) 
+		then
+			for i = 1, #ni.members.sort() do
+				if ni.healing.candispel(ni.members[i].guid)
+					and ni.members[i]:valid("Cleanse", false, true)
 				then
-                    local dispelMember = ni.members.inrange("player", 40)
-                    if dispelMember 
-                        and dispelMember.guid
-                        and ni.healing.candispel(dispelMember.guid) 
-                        and dispelMember:valid("Cleanse", false, true) 
-                    then
-                        ni.spell.cast("Cleanse", dispelMember.guid)
-                        print("Cleanse", dispelMember.name)
-                        return true
-                    end
-                else
-                    ni.spell.stopcasting()
-                end
-            end
-        end
-        return false
-    end,
+					ni.spell.cast("Cleanse", ni.members[i].guid)
+					print("Cleanse", ni.members[i].name)
+					return true
+				end
+			end
+		end
+		return false
+	end,
 
 	-- Sacred Shield
     ["Sacred Shield"] = function()
