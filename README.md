@@ -11,6 +11,7 @@ The script is tailored for the World of Warcraft Wrath of the Lich King, patch 3
 ## Getting Started
 
 This bot script is designed to be used with the [NI Program](https://github.com/darhanger/ni) developed by darhanger. 
+
 Download the latest Release version of the NI Program from the provided GitHub link.
 
 ### Installation
