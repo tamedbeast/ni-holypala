@@ -476,7 +476,8 @@ local abilities = {
     ["Divine Favor"] = function()
 		if enables["Divine Favor"] 
 		then
-			if UsableSilence(idName.spell("Divine Favor")) 
+			if UsableSilence(idName.spell("Divine Favor"))
+				and UnitAffectingCombat("player")
 			then
 				local lowMember = ni.members.inrangebelow("player", 40, values["Divine FavorThreshold"])[1]
 				if lowMember 
