@@ -10,14 +10,14 @@ local queue = {
 	"Divine Protection",
 	"Divine Sacrifice",
 	"Hand of Sacrifice",
-	"Use Healthstone",
+	"Healthstone",
 	"Aura Mastery",
-	"Divine Favor",
 	"Divine Illumination",
 	"Hand of Freedom",
 	"Hammer of Wrath",
 	"Hammer of Justice",
 	"Bauble of True Blood",
+	"Divine Favor",
 	"Holy Shock",
 	"Flash of Light",
 	"Cleanse",
@@ -33,16 +33,16 @@ local values = {
 	["Hand of ProtectionThreshold"] = 35,
 	["Divine SacrificeThreshold"] = 50,
 	["Hand of SacrificeThreshold"] = 65,
-	["Use HealthstoneThreshold"] = 40,
+	["HealthstoneThreshold"] = 40,
 	--["Sacred ShieldThreshold"] = 0,
 	--["Beacon of LightThreshold"] = 0,
 	["Aura MasteryThreshold"] = 65,
-	["Divine FavorThreshold"] = 75,
 	["Divine IlluminationThreshold"] = 65,
 	["Hand of FreedomThreshold"] = 65,
 	["Hammer of WrathThreshold"] = 20,
 	--["Hammer of JusticeThreshold"] = 0,
 	["Bauble of True BloodThreshold"] = 50,
+	["Divine FavorThreshold"] = 75,
 	["Holy ShockThreshold"] = 85,
 	["Flash of LightThreshold"] = 85,
 	["CleanseThreshold"] = 65,
@@ -56,16 +56,16 @@ local enables = {
 	["Hand of Protection"] = true,
 	["Divine Sacrifice"] = true,
 	["Hand of Sacrifice"] = true,
-	["Use Healthstone"] = true,
+	["Healthstone"] = true,
 	["Sacred Shield"] = true,
 	["Beacon of Light"] = true,
 	["Aura Mastery"] = true,
-	["Divine Favor"] = true,
 	["Divine Illumination"] = true,
 	["Hand of Freedom"] = true,
 	["Hammer of Wrath"] = true,
 	["Hammer of Justice"] = true,
 	["Bauble of True Blood"] = true,
+	["Divine Favor"] = true,
 	["Holy Shock"] = true,
 	["Flash of Light"] = true,
 	["Cleanse"] = true,
@@ -185,10 +185,11 @@ local abilities = {
     -- Divine Shield
     ["Divine Shield"] = function()
         if enables["Divine Shield"] then
-            if UsableSilence(idName.spell("Divine Shield")) then
+            if UsableSilence(idName.spell("Divine Shield")) 
+				and UnitAffectingCombat("player")
+			then
                 if ni.unit.hp("player") <= values["Divine ShieldThreshold"]
                     and not ni.unit.debuff("player", "Forbearance")
-                    and UnitAffectingCombat("player")
                 then
                     if UnitCastingInfo("player") or UnitChannelInfo("player") then
                         ni.spell.stopcasting()
@@ -205,12 +206,13 @@ local abilities = {
 	-- Hand of Protection
     ["Hand of Protection"] = function()
         if enables["Hand of Protection"] then
-            if UsableSilence(idName.spell("Hand of Protection")) then
+            if UsableSilence(idName.spell("Hand of Protection")) 
+				and UnitAffectingCombat("player")
+			then
                 local lowMember = ni.members.inrangebelow("player", 30, values["Hand of ProtectionThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Hand of Protection", false, true) 
                     and not ni.unit.debuff(lowMember.guid, "Forbearance")
-                    and UnitAffectingCombat("player")
                 then
                     ni.spell.cast("Hand of Protection", lowMember.guid)
                     print("Hand of Protection", lowMember.name)
@@ -228,12 +230,13 @@ local abilities = {
             if inArena then
                 return false
             end
-            if UsableSilence(idName.spell("Lay on Hands")) then
+            if UsableSilence(idName.spell("Lay on Hands")) 
+				and UnitAffectingCombat("player")
+			then
                 local lowMember = ni.members.inrangebelow("player", 40, values["Lay on HandsThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Lay on Hands", false, true) 
                     and not ni.unit.debuff(lowMember.guid, "Forbearance")
-					and UnitAffectingCombat("player")
                 then
                     ni.spell.cast("Lay on Hands", lowMember.guid)
                     print("Lay on Hands", lowMember.name)
@@ -247,10 +250,11 @@ local abilities = {
     -- Divine Protection
     ["Divine Protection"] = function()
         if enables["Divine Protection"] then
-            if UsableSilence(idName.spell("Divine Protection")) then
+            if UsableSilence(idName.spell("Divine Protection")) 
+				and UnitAffectingCombat("player")
+			then
                 if ni.unit.hp("player") <= values["Divine ShieldThreshold"]
                     and not ni.unit.debuff("player", "Forbearance")
-                    and UnitAffectingCombat("player")
                 then
                     if UnitCastingInfo("player") or UnitChannelInfo("player") then
                         ni.spell.stopcasting()
@@ -304,10 +308,10 @@ local abilities = {
         return false
     end,
 
-    -- Use Healthstone
-    ["Use Healthstone"] = function()
-        if enables["Use Healthstone"] then
-            if ni.unit.hp("player") <= values["Use HealthstoneThreshold"] then
+    -- Healthstone
+    ["Healthstone"] = function()
+        if enables["Healthstone"] then
+            if ni.unit.hp("player") <= values["HealthstoneThreshold"] then
                 if ni.player.hasitem(idName.item("Fel Healthstone"))
                     and UnitAffectingCombat("player")
                 then
@@ -338,36 +342,13 @@ local abilities = {
         return false
     end,
 
-    -- Divine Favor
-    ["Divine Favor"] = function()
-        if enables["Divine Favor"] then
-            if UsableSilence(idName.spell("Divine Favor")) 
-                and ni.spell.available("Holy Shock")
-            then
-                if ni.unit.hp("player") <= values["Divine FavorThreshold"] 
-                    and UnitAffectingCombat("player") 
-                then
-                    ni.spell.cast("Divine Favor", "player")
-                    print("Divine Favor")
-                    for i = 1, #ni.members.sort() do
-                        if ni.members[i]:valid("Holy Shock", false, true) then
-                            ni.spell.cast("Holy Shock", ni.members[i].guid)
-                            print("Holy Shock")
-                            return true
-                        end
-                    end
-                end
-            end
-        end
-        return false
-    end,
-
     -- Divine Illumination
     ["Divine Illumination"] = function()
         if enables["Divine Illumination"] then
-            if UsableSilence(idName.spell("Divine Illumination")) then
-                if ni.unit.power("player") <= values["Divine IlluminationThreshold"]
-                    and UnitAffectingCombat("player")
+            if UsableSilence(idName.spell("Divine Illumination")) 
+				and UnitAffectingCombat("player")
+			then
+                if ni.unit.power("player") <= values["Divine IlluminationThreshold"] 
                 then
                     ni.spell.cast("Divine Illumination", "player")
                     print("Divine Illumination")
@@ -444,33 +425,53 @@ local abilities = {
     end,
 
     -- Bauble of True Blood (Trinket)
-    -- Uses the Bauble of True Blood trinket on any group member if their health is below the threshold.
     ["Bauble of True Blood"] = function()
-        if enables["Bauble of True Blood"] then 
-            if ni.player.hasitemequipped(50354) 
-                and ni.player.itemcd(50354) == 0
-            then
-                local membersInRange = ni.members.inrange("player", 40)
-                for i = 1, #membersInRange do
-                    local member = membersInRange[i]
-                    if member:hp() <= values["Bauble of True BloodThreshold"]
-                        and member:combat()
-                        and member:los()
-                    then
-                        ni.player.useitem(50354, member.guid)
-                        print("Bauble of True Blood", member.name)
-                        return true
-                    end
-                end
-            end
-        end
-        return false
-    end,
+		if enables["Bauble of True Blood"] 
+		then
+			if ni.player.hasitemequipped(idName.item("Bauble of True Blood")) 
+				and ni.player.itemcd(idName.item("Bauble of True Blood")) == 0
+				and UnitAffectingCombat("player")
+			then
+				local lowMember = ni.members.inrangebelow("player", 40, values["Bauble of True BloodThreshold"])[1]
+				if lowMember 
+					and lowMember:los() 
+				then
+					ni.player.useitem(idName.item("Bauble of True Blood"), lowMember.guid)
+					print("Bauble of True Blood", lowMember.name)
+					return true
+				end
+			end
+		end
+		return false
+	end,
 
+	-- Divine Favor
+    ["Divine Favor"] = function()
+		if enables["Divine Favor"] then
+			if UsableSilence(idName.spell("Divine Favor")) 
+			then
+				local lowMember = ni.members.inrangebelow("player", 40, values["Divine FavorThreshold"])[1]
+				if lowMember 
+					and lowMember:valid("Holy Shock", false, true)
+					and ni.spell.available("Divine Favor")
+				then
+					ni.spell.cast("Divine Favor", "player")
+					print("Divine Favor")
+					ni.spell.cast("Holy Shock", lowMember.guid)
+					print("Holy Shock")
+					return true
+				end
+			end
+		end
+		return false
+	end,
+
+	
     -- Holy Shock
     ["Holy Shock"] = function()
         if enables["Holy Shock"] then
-            if UsableSilence(idName.spell("Holy Shock"))  then
+            if UsableSilence(idName.spell("Holy Shock")) 
+			then
                 local lowMember = ni.members.inrangebelow("player", 40, values["Holy ShockThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Holy Shock", false, true)
@@ -493,7 +494,6 @@ local abilities = {
                 local lowMember = ni.members.inrangebelow("player", 40, values["Flash of LightThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Flash of Light", false, true)
-					and UsableSilence(idName.spell("Flash of Light"))
                 then
                     ni.spell.cast("Flash of Light", lowMember.guid)
                     print("Flash of Light", lowMember.name)
@@ -591,14 +591,14 @@ ni.bootstrap.profile("HPal", queue, abilities, OnLoad, OnUnLoad)
 else
     local queue = {
         "Error",
-    };
+    }
     local abilities = {
         ["Error"] = function()
-            ni.vars.profiles.enabled = false;
+            ni.vars.profiles.enabled = false
 			if not wotlk then
-				ni.frames.floatingtext:message("This profile for WotLK 3.3.5a!")
+				ni.frames.floatingtext:message("Profile for 3.3.5a")
             end
         end,
-    };
-    ni.bootstrap.profile("HPal", queue, abilities);
-end;
+    }
+    ni.bootstrap.profile("HPal", queue, abilities)
+end
