@@ -105,7 +105,6 @@ local HoFDebuff = {
     "Ice Trap"
 }
 
--- Get spell or id number by name
 local idName = setmetatable({}, {
     __index = function(_, type)
         return function(name)
@@ -396,34 +395,34 @@ local abilities = {
     end,
 
     -- Hand of Freedom
-    ["Hand of Freedom"] = function()
-        if enables["Hand of Freedom"] 
-		then
-            if UsableSilence(idName.spell("Hand of Freedom")) 
+	["Hand of Freedom"] = function()
+		if enables["Hand of Freedom"] then
+			if UsableSilence(idName.spell("Hand of Freedom")) 
 			then
-                for i = 1, #ni.members.sort() do
-                    local member = ni.members[i]
-                    local hasHoFDebuff = false
-                    for debuffName, debuffId in pairs(HoFDebuff) do
-                        if member:debuff(debuffId) 
+				for i = 1, #ni.members.sort() do
+					local member = ni.members[i]
+					local hasHoFDebuff = false
+					for _, debuffName in ipairs(HoFDebuff) do
+						local debuffId = idName.spell(debuffName)
+						if member:debuff(debuffId) 
 						then
-                            hasHoFDebuff = true
-                            break
-                        end
-                    end
-                    if member:valid("Hand of Freedom", false, true) 
-                        and member:combat() 
-                        and hasHoFDebuff
-                    then
-                        ni.spell.cast("Hand of Freedom", member.unit)
-                        print("Hand of Freedom", member.name)
-                        return true
-                    end
-                end
-            end
-        end
-        return false
-    end,
+							hasHoFDebuff = true
+							break
+						end
+					end
+					if member:valid("Hand of Freedom", false, true) 
+						and member:combat() 
+						and hasHoFDebuff
+					then
+						ni.spell.cast("Hand of Freedom", member.unit)
+						print("Hand of Freedom", member.name)
+						return true
+					end
+				end
+			end
+		end
+		return false
+	end,
 
     -- Hammer of Justice
     ["Hammer of Justice"] = function()
