@@ -29,7 +29,10 @@ Download the latest Release version of the NI Program from the provided GitHub l
 
 ## Settings
 
-The bot script includes various settings that can be customized to suit your needs, such as health thresholds for specific spells, range checks, and more. Please refer to the bot's settings section for more information.
+If you want to reset to default settings
+1. Open `Ni Folder\Addons\Settings` folder
+2. Delete filename `HPal.lua`
+3. Reload UI by typing `/reload` in-game
 
 ## Disclaimer
 
