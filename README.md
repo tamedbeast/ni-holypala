@@ -27,7 +27,7 @@ Download the latest Release version of the NI Program from the provided GitHub l
 2.  Top menu is auto-hidden, edit variables to your preference.
 3.  Click minimap icon for settings.
 
-## Settings
+### Settings
 
 If you want to reset to default settings
 1. Open `Ni Folder\Addons\Settings` folder
