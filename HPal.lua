@@ -31,8 +31,8 @@ local values = {
 	["Lay on HandsThreshold"] = 35,
 	["Divine ProtectionThreshold"] = 35,
 	["Hand of ProtectionThreshold"] = 35,
-	["Divine SacrificeThreshold"] = 65,
-	["Hand of SacrificeThreshold"] = 65,
+	["Divine SacrificeThreshold"] = 75,
+	["Hand of SacrificeThreshold"] = 75,
 	["HealthstoneThreshold"] = 40,
 	--["Sacred ShieldThreshold"] = 0,
 	--["Beacon of LightThreshold"] = 0,
@@ -305,6 +305,7 @@ local abilities = {
                 if lowMember 
                     and lowMember:valid("Hand of Sacrifice", false, true) 
                     and lowMember.guid ~= UnitGUID("player")
+					and not ni.unit.buff("player", "Hand of Freedom")
 					and not ni.unit.debuff("player", "Forbearance")
                 then
                     ni.spell.cast("Hand of Sacrifice", lowMember.guid)
