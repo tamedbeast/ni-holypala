@@ -118,18 +118,18 @@ local idName = setmetatable({}, {
 })
 
 -- Pre Calculate Spell and Item IDs (uncomment if you want to use this)
--- local preCalcId = {}
--- for _, name in ipairs(queue) do
-    -- if name ~= "Pause" and name ~= "Fel Healthstone" then
-        -- local id = idName.spell(name) or idName.item(name)
-        -- if id then
-            -- preCalcId[name] = id
-            -- print("Name: '" .. name .. "' has ID: " .. id)
-        -- else
-            -- print("Warning: Could not find ID for name '" .. name .. "'")
-        -- end
-    -- end
--- end
+local preCalcId = {}
+for _, name in ipairs(queue) do
+    if name ~= "Pause" and name ~= "Fel Healthstone" then
+        local id = idName.spell(name) or idName.item(name)
+        if id then
+            preCalcId[name] = id
+            print("Name: '" .. name .. "' has ID: " .. id)
+        else
+            print("Warning: Could not find ID for name '" .. name .. "'")
+        end
+    end
+end
 
 -- Function Usable Spells when under crowd control
 local function UsableSilence(spellid, stutter)
@@ -201,19 +201,17 @@ local abilities = {
         if enables["Divine Shield"] 
 		then
             if UsableSilence(idName.spell("Divine Shield")) 
+				and ni.unit.hp("player") <= values["Divine ShieldThreshold"]
+				and not ni.unit.debuff("player", "Forbearance")
 				and UnitAffectingCombat("player")
-			then
-                if ni.unit.hp("player") <= values["Divine ShieldThreshold"]
-                    and not ni.unit.debuff("player", "Forbearance")
                 then
-                    if UnitCastingInfo("player") or UnitChannelInfo("player") 
+					if UnitCastingInfo("player") or UnitChannelInfo("player") 
 					then
-                        ni.spell.stopcasting()
-                    end
-                    ni.spell.cast("Divine Shield", "player")
-                    print("Divine Shield")
-                    return true
-                end
+							ni.spell.stopcasting()
+					end
+				ni.spell.cast("Divine Shield", "player")
+				print("Divine Shield")
+				return true
             end
         end
         return false
@@ -270,19 +268,17 @@ local abilities = {
         if enables["Divine Protection"] 
 		then
             if UsableSilence(idName.spell("Divine Protection")) 
+				and ni.unit.hp("player") <= values["Divine ShieldThreshold"]	
+				and not ni.unit.debuff("player", "Forbearance")
 				and UnitAffectingCombat("player")
 			then
-                if ni.unit.hp("player") <= values["Divine ShieldThreshold"]
-                    and not ni.unit.debuff("player", "Forbearance")
-                then
-                    if UnitCastingInfo("player") or UnitChannelInfo("player") 
-					then
-                        ni.spell.stopcasting()
-                    end
-                    ni.spell.cast("Divine Protection", "player")
-                    print("Divine Protection")
-                    return true
-                end
+				if UnitCastingInfo("player") or UnitChannelInfo("player") 
+				then
+					ni.spell.stopcasting()
+				end
+				ni.spell.cast("Divine Protection", "player")
+				print("Divine Protection")
+				return true
             end
         end
         return false
@@ -313,14 +309,13 @@ local abilities = {
         if enables["Hand of Sacrifice"] 
 		then
             if UsableSilence(idName.spell("Hand of Sacrifice"))
-                and UnitAffectingCombat("player")
+				and not (ni.unit.buff("player", "Hand of Freedom") or ni.unit.buff("player", "Divine Shield"))
+				and UnitAffectingCombat("player")
             then
                 local lowMember = ni.members.inrangebelow("player", 30, values["Hand of SacrificeThreshold"])[1]
                 if lowMember 
                     and lowMember:valid("Hand of Sacrifice", false, true) 
                     and lowMember.guid ~= UnitGUID("player")
-					and not ni.unit.buff("player", "Hand of Freedom")
-					and not ni.unit.debuff("player", "Forbearance")
                 then
                     ni.spell.cast("Hand of Sacrifice", lowMember.guid)
                     print("Hand of Sacrifice", lowMember.name)
@@ -336,14 +331,12 @@ local abilities = {
         if enables["Fel Healthstone"] 
 		then
             if ni.unit.hp("player") <= values["Fel HealthstoneThreshold"] 
+			and (ni.player.hasitem(36894) or ni.player.hasitem(36892))
+			and UnitAffectingCombat("player")
 			then
-                if ni.player.hasitem(idName.item("Fel Healthstone"))
-                    and UnitAffectingCombat("player")
-                then
-                    ni.player.useitem("Fel Healthstone")
-                    print("Fel Healthstone")
-                    return true
-                end
+				ni.player.useitem("Fel Healthstone")
+				print("Fel Healthstone")
+				return true
             end
         end
         return false
@@ -351,18 +344,17 @@ local abilities = {
 
     -- Aura Mastery
     ["Aura Mastery"] = function()
-        if enables["Aura Mastery"] then
+        if enables["Aura Mastery"] 
+		then
             if UsableSilence(idName.spell("Aura Mastery")) 
+				and ni.unit.hp("player") <= values["Aura MasteryThreshold"]
+				and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
+				and ni.unit.buff("player", "Concentration Aura")
+				and UnitAffectingCombat("player")
 			then
-                if ni.unit.hp("player") <= values["Aura MasteryThreshold"]
-                    and ni.unit.buff("player", "Concentration Aura")
-                    and UnitAffectingCombat("player")
-                    and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
-                then
-                    ni.spell.cast("Aura Mastery", "player")
-                    print("Aura Mastery")
-                    return true
-                end
+				ni.spell.cast("Aura Mastery", "player")
+				print("Aura Mastery")
+				return true
             end
         end
         return false
@@ -373,14 +365,12 @@ local abilities = {
         if enables["Divine Illumination"] 
 		then
             if UsableSilence(idName.spell("Divine Illumination")) 
+				and ni.unit.power("player") <= values["Divine IlluminationThreshold"] 
 				and UnitAffectingCombat("player")
 			then
-                if ni.unit.power("player") <= values["Divine IlluminationThreshold"] 
-                then
-                    ni.spell.cast("Divine Illumination", "player")
-                    print("Divine Illumination")
-                    return true
-                end
+				ni.spell.cast("Divine Illumination", "player")
+				print("Divine Illumination")
+				return true
             end
         end
         return false
@@ -563,14 +553,12 @@ local abilities = {
         if enables["Sacred Shield"] 
 		then
             if UsableSilence(idName.spell("Sacred Shield")) 
+				and not ni.unit.buff("player", "Sacred Shield")
+				and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
 			then
-                if not ni.unit.buff("player", "Sacred Shield")
-                    and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
-                then
-                    ni.spell.cast("Sacred Shield", "player")
-                    print("Sacred Shield")
-                    return true
-                end
+				ni.spell.cast("Sacred Shield", "player")
+				print("Sacred Shield")
+				return true
             end
         end
         return false
@@ -581,14 +569,12 @@ local abilities = {
         if enables["Beacon of Light"] 
 		then
             if UsableSilence(idName.spell("Beacon of Light")) 
+				and not ni.unit.buff("player", "Beacon of Light")
+				and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
 			then
-                if not ni.unit.buff("player", "Beacon of Light")
-                    and not (ni.unit.buff("player", "Divine Shield") or ni.unit.buff("player", "Hand of Protection"))
-                then
-                    ni.spell.cast("Beacon of Light", "player")
-                    print("Beacon of Light")
-                    return true
-                end
+				ni.spell.cast("Beacon of Light", "player")
+				print("Beacon of Light")
+				return true
             end
         end
         return false
