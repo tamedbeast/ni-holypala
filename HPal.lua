@@ -10,7 +10,7 @@ local queue = {
 	"Divine Protection",
 	"Divine Sacrifice",
 	"Hand of Sacrifice",
-	"Healthstone",
+	"Fel Healthstone",
 	"Aura Mastery",
 	"Divine Illumination",
 	"Hand of Freedom",
@@ -33,7 +33,7 @@ local values = {
 	["Hand of ProtectionThreshold"] = 35,
 	["Divine SacrificeThreshold"] = 75,
 	["Hand of SacrificeThreshold"] = 75,
-	["HealthstoneThreshold"] = 40,
+	["Fel HealthstoneThreshold"] = 40,
 	--["Sacred ShieldThreshold"] = 0,
 	--["Beacon of LightThreshold"] = 0,
 	["Aura MasteryThreshold"] = 65,
@@ -56,7 +56,7 @@ local enables = {
 	["Hand of Protection"] = true,
 	["Divine Sacrifice"] = true,
 	["Hand of Sacrifice"] = true,
-	["Healthstone"] = true,
+	["Fel Healthstone"] = true,
 	["Sacred Shield"] = true,
 	["Beacon of Light"] = true,
 	["Aura Mastery"] = true,
@@ -116,13 +116,20 @@ local idName = setmetatable({}, {
         end
     end
 })
--- Pre Calculate Spell IDs
-local preCalcSpellId = {}
-for spell in pairs(queue) do
-    if spell ~= "Pause" then
-        preCalcSpellId[spell] = idName.spell(spell)
-    end
-end
+
+-- Pre Calculate Spell and Item IDs (uncomment if you want to use this)
+-- local preCalcId = {}
+-- for _, name in ipairs(queue) do
+    -- if name ~= "Pause" and name ~= "Fel Healthstone" then
+        -- local id = idName.spell(name) or idName.item(name)
+        -- if id then
+            -- preCalcId[name] = id
+            -- print("Name: '" .. name .. "' has ID: " .. id)
+        -- else
+            -- print("Warning: Could not find ID for name '" .. name .. "'")
+        -- end
+    -- end
+-- end
 
 -- Function Usable Spells when under crowd control
 local function UsableSilence(spellid, stutter)
@@ -324,17 +331,17 @@ local abilities = {
         return false
     end,
 
-    -- Healthstone
-    ["Healthstone"] = function()
-        if enables["Healthstone"] 
+    -- Fel Healthstone
+    ["Fel Healthstone"] = function()
+        if enables["Fel Healthstone"] 
 		then
-            if ni.unit.hp("player") <= values["HealthstoneThreshold"] 
+            if ni.unit.hp("player") <= values["Fel HealthstoneThreshold"] 
 			then
                 if ni.player.hasitem(idName.item("Fel Healthstone"))
                     and UnitAffectingCombat("player")
                 then
                     ni.player.useitem("Fel Healthstone")
-                    print("Healthstone")
+                    print("Fel Healthstone")
                     return true
                 end
             end
