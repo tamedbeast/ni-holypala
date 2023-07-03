@@ -117,7 +117,7 @@ local idName = setmetatable({}, {
     end
 })
 
--- Pre Calculate Spell and Item IDs (uncomment if you want to use this)
+-- Pre Calculate Spell and Item IDs
 local preCalcId = {}
 for _, name in ipairs(queue) do
     if name ~= "Pause" and name ~= "Fel Healthstone" then
