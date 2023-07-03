@@ -151,6 +151,16 @@ local function UsableSilence(spellid, stutter)
 	return result;
 end;
 
+local function GUICallback(key, item_type, value)
+    if item_type == "enabled" then
+        local ability = key:gsub("Threshold", "")
+        enables[ability] = value
+        --print("Updated", ability, "to", tostring(value))
+    elseif item_type == "value" then
+        values[key] = value
+    end
+end
+
 -- GUI
 local items = {
 	settingsfile = "HPal.json",
@@ -171,15 +181,6 @@ for _, ability in ipairs(queue) do
             value = values[ability .. "Threshold"],
             key = ability .. "Threshold"
         })
-    end
-end
-
-local function GUICallback(key, item_type, value)
-    if item_type == "enabled" then
-        local ability = key:gsub("Threshold", "")
-        enables[ability] = value
-    elseif item_type == "value" then
-        values[key] = value
     end
 end
 
