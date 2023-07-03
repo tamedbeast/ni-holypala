@@ -118,13 +118,14 @@ local idName = setmetatable({}, {
 })
 
 -- Pre Calculate Spell and Item IDs
+print("Starting pre-calculation of spells and items IDs...")
 local preCalcId = {}
 for _, name in ipairs(queue) do
     if name ~= "Pause" and name ~= "Fel Healthstone" then
         local id = idName.spell(name) or idName.item(name)
         if id then
             preCalcId[name] = id
-            print("Name: '" .. name .. "' has ID: " .. id)
+            print(name .. ": " .. id)
         else
             print("Warning: Could not find ID for name '" .. name .. "'")
         end
